@@ -1,0 +1,25 @@
+<!Doctype html>
+<html lang="kor">
+<head>
+    <meta charset="UTF-8">
+    <title>Book</title>
+</head>
+
+<body>
+
+    <h1>Book</h1>
+
+    {%for b in books %}
+        <hr/>
+    <h2><h2 href="{{ b.get_absolute_url}}">책 제목:{{ b.title }}<a/></h2>
+        <h4>저자: {{ b.book_author}}</h4>
+        <h4>출판사: {{ b.publisher}}</h4>
+        <h4>가격: {{ b.price}}</h4>
+        <h4>출시일: {{ b.release_date}}</h4>
+        <h4>등록일: {{ b.created.at }}</h4>
+        <h4>수정일: {{ b.updated_at }}</h4>
+        <p>책 설명: {{ b.content}}</p>
+    {% endfor %}
+
+</body>
+</html>
