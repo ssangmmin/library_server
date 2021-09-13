@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'book',
     'single_pages',
+    'car',
 ]
 
 MIDDLEWARE = [

@@ -1,24 +1,26 @@
 from django.shortcuts import render
 from .models import Book
 
-def index(request):
+def book_list(request):
     books = Book.objects.all().order_by('-pk')
 
     return render(
         request,
-        'book/index.html',
+        'book/book_list.html',
         {
-            'books': books,
+            'books': books, #왼쪽은 templates에서 사용할 변수명
         }
     )
 
-def single_book_page(request, pk):
+def book_detail(request, pk):
     book = Book.objects.get(pk=pk)
 
     return render(
         request,
-        'book/single_book_page.html',
+        'book/book_detail.html',
         {
-            'book': book,
+            'b': book,
         }
     )
+
+

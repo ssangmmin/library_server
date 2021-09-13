@@ -1,0 +1,19 @@
+<!Doctype html>
+<html lang="kor">
+    <head>
+        <meta charset="UTF-8">
+        <title>도서목록 페이지 입니다</title>
+    </head>
+    <body>
+       <h1>Book</h1>
+
+    {%for b in books %}
+        <hr/>
+        <h2><a href="{{ b.get_absolute_url}}">책 제목:{{ b.title }}<a/></h2>
+
+        <h4>가격: {{ b.price }}</h4>
+
+    {% endfor %}
+
+    </body>
+</html>

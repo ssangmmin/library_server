@@ -1,0 +1,19 @@
+<!Doctype html>
+<html lang="kor">
+    <head>
+        <meta charset="UTF-8">
+        <title>자동차 페이지입니다</title>
+    </head>
+    <body>
+       <h1>CAR</h1>
+
+       {%for cars in cars %}
+        <hr/>
+       <h2><a href="{{ cars.get_absolute_url}}">{{ cars.name }}</a></h2>
+        <h4>{{cars.manufacturer}}</h4>
+        <h4>{{cars.price }}</h4>
+       {% endfor %}
+
+
+    </body>
+</html>
