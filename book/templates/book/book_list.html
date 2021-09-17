@@ -2,7 +2,7 @@
 {% load static %}
 <html>
     <head>
-        <title>Blog</title>
+        <title>Book</title>
         <link href="{% static 'book/bootstrap/bootstrap.css' %}" rel="stylesheet" type="text/css"
         media="screen">
         <script src="https://kit.fontawesome.com/b6b8876bf4.js" crossorigin="anonymous"></script>
@@ -138,8 +138,8 @@
                         <div class="card-body">
                             <div class="small text=muted">{{ b.release_date }}</div>
                             <h2 class="card-title h4">{{ b.title }}</h2>
-                            <p class="card=text">동해물과 백두산이 마르고 닳도.</p>
-                            <a class="btn btn-secondary" href="#!">Read more</a>
+                            <p class="card=text">{{ b.content }}</p>
+                            <a class="btn btn-secondary" href="{{ b.get_absolute_url }}">Read more</a>
                         </div>
                     </div>
                     {% endfor %}
