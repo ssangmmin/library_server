@@ -17,7 +17,7 @@
           <nav class="navbar navbar-expand-lg navbar-light bg-light">
             <div class="container">
                 <!-- 브랜드 명을 입력하는 부분 -->
-                <a class="navbar-brand " href="#">Do It Django</a>
+                <a class="navbar-brand " href="#">ssong's library</a>
 
                 <!-- navbar-expand-lg 클래스를 nav 태그에서 사용한 경우는 992px보다 작을 경우 아래 버튼 표시 -->
                 <!-- 아래 버튼은 폰 화면 크기에서 메뉴를 보였다 숨겼다 하는 버튼 -->
@@ -37,12 +37,12 @@
 
                         <!-- 첫번째 메뉴 -->
                             <li class="nav-item">
-                                <a class="nav-link" href="./index.html">Home <span class="sr-only">(current)</span></a>
+                                <a class="nav-link" href="/">Home <span class="sr-only">(current)</span></a>
                             </li>
 
                             <!-- 두번째 메뉴 -->
                             <li class="nav-item active">
-                                <a class="nav-link" href="./blog_list.html">Blog</a>
+                                <a class="nav-link" href="/book">Book</a>
                             </li>
 
                             <!-- 세번째 메뉴 -->
@@ -102,8 +102,11 @@
                             <p class="lead">by <a href="#">작성자명 쓸 위치(개발예정)</a></p>
 
                         </header>
-                        <!-- Preview image figure-->
-                        <figure class="mb-4"><img class="img-fluid rounded" src="{{ book.head_image.url }}" alt="..." /></figure>
+                        {% if book.head_image %}
+                            <img class="img-fluid rounded" src="{{ book.head_image.url }}" alt="{{ book.title }}" head_image>
+                        {% else %}
+                            <img class="img-fluid rounded" src="https://picsum.photos/seed/{{ book.id }}/800/200" alt="random_image">
+                        {% endif %}
 
                         <!-- Post content-->
                         <section class="mb-5">

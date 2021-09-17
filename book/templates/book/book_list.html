@@ -126,9 +126,13 @@
                     <!-- Blog post -->
                     <div class="card">
                         <!-- 블로그 포스트 카드의 그림영역 -->
+                        {% if b.head_image %}
                         <a href="#!">
-                            <img class="card-img-top" src="{{ b.head_image.url }}">
+                            <img class="card-img-top" src="{{ b.head_image.url }}" alt="{{ b }} head image">
                         </a>
+                        {% else %}
+                            <img class="card-img-top" src="https://picsum.photos/seed/{{ b.id }}/200/200" alt=":random_image"
+                        {% endif %}
                         <!-- 블로그 글의 요약 부분 -->
                         <div class="card-body">
                             <div class="small text=muted">{{ b.release_date }}</div>
