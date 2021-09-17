@@ -137,7 +137,10 @@
                         <div class="card-body">
                             <div class="small text=muted">{{ b.release_date }}</div>
                             <h2 class="card-title h4">{{ b.title }}</h2>
-                            <p class="card=text">{{ b.content }}</p>
+                            {% if b.hook_text %}
+                                <h5 class="text-muted">{{ b.hook_text }}</h5>
+                            {% endif %}
+                            <p class="card=text">{{ b.content | truncatewords:45 }}</p>
                             <a class="btn btn-secondary" href="{{ b.get_absolute_url }}">Read more</a>
                         </div>
                     </div>
