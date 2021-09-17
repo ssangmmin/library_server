@@ -11,6 +11,7 @@
         <link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
         <!-- Core theme CSS (includes Bootstrap)-->
         <link href="{% static 'book/bootstrap/bootstrap.css' %}" rel="stylesheet" media="screen" />
+        <script src="https://kit.fontawesome.com/b6b8876bf4.js" crossorigin="anonymous"></script>
     </head>
     <body>
          <!-- 내비게이션바 영역(992px보다 크면 메뉴 확장버튼 숨겨짐, 배경은 밝은색) -->
@@ -111,9 +112,27 @@
                         <!-- Post content-->
                         <section class="mb-5">
                             <p>{{ book.content }}</p>
+
+                            {% if book.file_upload %}
+                         <a href="{{ book.file.upload.url }}" class="btn btn-info" role="button">
+                             Download:
+                             {% if book.get_file_ext == 'csv' %}
+                                <i class="fas fa-file-csv"></i>
+                             {% elif book.get_file_ext == 'xlsx' or book.get_file_ext == 'xls' %}
+                                <i class="fas fa-file-excel"></i>
+                             {% elif book.get_file_ext == 'docx' or book.get_file_ext == 'doc' %}
+                                <i class="fas fa-file=word"></i>
+                             {% else %}
+                                <i class="far fa-file"></i>
+                             {% endif %}
+                         </a>
+                            {% endif %}
                         </section>
 
+
+
                     </article>
+
                     <!-- Comments section-->
                     <section class="mb-5">
                         <div class="card bg-light">
