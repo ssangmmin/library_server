@@ -1,10 +1,14 @@
+import self as self
 from django.test import TestCase, Client
 from bs4 import BeautifulSoup
+from django.contrib.auth.models import User
 from .models import Book
 
 class TestView(TestCase):
     def setUp(self):
         self.client = Client()
+        self.user_trump = User.objects.create_user(username='trump', password='somepassword')
+        self.user_obama = User.objects.create_user(username='obama', password='somepassword')
 
     def test_book_list(self):
         #1.1 테스트 목록 페이지를 가져온다.
@@ -40,6 +44,7 @@ class TestView(TestCase):
             price='13000',
             release_date='2021-09-23',
             content='dadsjdasd',
+            author=self.user_trump
 
         )
 
@@ -50,6 +55,7 @@ class TestView(TestCase):
             price='13000',
             release_date='2021-09-23',
             content='dadsjdasd',
+            author=self.user_obama
         )
 
         self.assertEqual(Book.objects.count(), 2)
@@ -64,3 +70,8 @@ class TestView(TestCase):
 
         #3.2 '아직 게시물이 없습니다'라는 문구는 더 이상 보이지 않는다.
         self.assertNotIn('아직 게시물이 없습니다', main_area.text)
+
+        self.assertIn(self.user_trump.username.upper(), main_area.text)
+        self.assertIn(self.user_obama.username.upper(), main_area.text)
+
+
