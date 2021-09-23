@@ -24,6 +24,11 @@
         <p class="card=text">{{ b.content | truncatewords:45 }}</p>
         <a class="btn btn-secondary" href="{{ b.get_absolute_url }}">Read more</a>
     </div>
+    <div class="card-footer text-muted">
+        Posted on {{ b.created_at }} by
+        <a href="#">{{ b.author | upper }}</a>
+    </div>
+
 </div>
 {% endfor %}
 {% else %}
