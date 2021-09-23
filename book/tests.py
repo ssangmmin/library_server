@@ -24,4 +24,43 @@ class TestView(TestCase):
         self.assertIn('Home', navbar.text)
         self.assertIn('자료검색', navbar.text)
         self.assertIn('도서관안내', navbar.text)
-        
+
+        #2.1 메인 영역에 게시물이 하나도 없다면 (count 함수 활용)
+        self.assertEqual(Book.objects.count(), 0)
+
+        #2.2 '아직 게시물이 없습니다'라는 문구가 보인다.
+        main_area = soup.find('div', id='main-area')
+        self.assertIn('아직 게시물이 없습니다', main_area.text)
+
+        #3.1 게시물 2개를 등록하고 2개가 등록되었는지 체크
+        book_001 = Book.objects.create(
+            title='파친코1',
+            book_author='이민진',
+            publisher='문학사상',
+            price='13000',
+            release_date='2021-09-23',
+            content='dadsjdasd',
+
+        )
+
+        book_002 = Book.objects.create(
+            title='파친코2',
+            book_author='이민진',
+            publisher='문학사상',
+            price='13000',
+            release_date='2021-09-23',
+            content='dadsjdasd',
+        )
+
+        self.assertEqual(Book.objects.count(), 2)
+
+        response = self.client.get('/book/')
+        soup = BeautifulSoup(response.content, 'html.parser')
+        self.assertEqual(response.status_code, 200)
+
+        main_area = soup.find('div', id='main-area')
+        self.assertIn(book_001.title, main_area.text)
+        self.assertIn(book_002.title, main_area.text)
+
+        #3.2 '아직 게시물이 없습니다'라는 문구는 더 이상 보이지 않는다.
+        self.assertNotIn('아직 게시물이 없습니다', main_area.text)
