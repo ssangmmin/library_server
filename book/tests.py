@@ -110,7 +110,7 @@ class TestView(TestCase):
         self.assertIn(book_001.title, book_area.text)
 
         #2.5 첫 번째 도서의 작성자(author)가 도서영역에 있다.
-        #아직 작성불가
+        self.assertIn(self.user_trump.username.upper(), book_area.text)
 
         #2.6 첫 번째 도서의 내용(content)가 도서영역에 있다.
         self.assertIn(book_001.content, book_area.text)
