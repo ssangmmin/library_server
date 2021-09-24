@@ -50,11 +50,16 @@
                 <div class="card-header">Categories</div>
                 <div class="card-body">
                     <div class="row">
-                        <div class="col-sm-6">
-                            <ul class="list-unstyled mb-0">
-                                <li><a href="#">Web Design</a></li>
-                                <li><a href="#">HTML</a></li>
-                                <li><a href="#">Freebies</a></li>
+                        <div>
+                            <ul>
+                                {% for category in categories %}
+                                <li>
+                                    <a href="{{ category.get_absolute_url }}">{{ category }} ({{ category.book_set_count }})</a>
+                                </li>
+                                {% endfor %}
+                                <li>
+                                    <a href="/book/category/no_category/">미분류 ({{ no_category_book_count }})</a>
+                                </li>
                             </ul>
                         </div>
                     </div>

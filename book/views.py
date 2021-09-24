@@ -1,11 +1,17 @@
-# from django.shortcuts import render
-from .models import Book
+from django.shortcuts import render
+from .models import Book, Category
 from django.views.generic import ListView, DetailView
 
 
 class book_list(ListView):
     model = Book
     ordering = '-pk'
+
+    def get_context_data(self, **kwargs):
+        context = super(book_list, self).get_context_data()
+        context['categories'] = Category.objects.all()
+        context['no_category_book_count'] = Book.objects.filter(category=None).count()
+        return context
 
 
 # def book_list(request):

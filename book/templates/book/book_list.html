@@ -5,7 +5,7 @@
 {% if book_list.exists %}
 {% for b in book_list %}
 <!-- Blog post -->
-<div class="card">
+<div class="card" id="book-{{ b.pk }}">
     <!-- 블로그 포스트 카드의 그림영역 -->
     {% if b.head_image %}
     <a href="#!">
@@ -16,6 +16,11 @@
     {% endif %}
     <!-- 블로그 글의 요약 부분 -->
     <div class="card-body">
+        {% if b.category %}
+        <span class="badge badge-secondary float-right">{{ b.category }}</span>
+        {% else %}
+            <span class="badge badge-secondary float-right">미분류</span>
+        {% endif %}
         <div class="small text=muted">{{ b.release_date }}</div>
         <h2 class="card-title h4">{{ b.title }}</h2>
         {% if b.hook_text %}

@@ -5,12 +5,14 @@ from django.contrib.auth.models import User
 from .models import Book, Category
 
 class TestView(TestCase):
+
+
     def setUp(self):
         self.client = Client()
         self.user_trump = User.objects.create_user(username='trump', password='somepassword')
         self.user_obama = User.objects.create_user(username='obama', password='somepassword')
 
-        self.category_progamming = Category.objects.create(name='programming', slug='programming')
+        self.category_programming = Category.objects.create(name='programming', slug='programming')
         self.category_music = Category.objects.create(name='music', slug='music')
 
         self.book_001 = Book.objects.create(
@@ -21,7 +23,7 @@ class TestView(TestCase):
             release_date='2021-09-23',
             content='dadsjdasd',
             author=self.user_trump,
-            category=self.category_progamming,
+            category=self.category_programming,
 
 
         )
@@ -53,29 +55,27 @@ class TestView(TestCase):
         self.assertIn('자료검색', navbar.text)
 
         #로고 버튼은 홈으로 이동해야 한다.
-        logo_btn = navbar.find('a', text='Do It Django')
+        logo_btn = navbar.find('a', text='ssong library')
         self.assertEqual(logo_btn.attrs['href'], '/')
 
         # Home 버튼은 홈으로 이동해야 한다.
         home_btn = navbar.find('a', text='Home')
         self.assertEqual(home_btn.attrs['href'], '/')
 
-        # Blog 버튼은 포스트 목록 페이지로 이동해야 한다.
-        blog_btn = navbar.find('a', text='도서관안내')
+        # 자료검색 버튼은 포스트 목록 페이지로 이동해야 한다.
+        blog_btn = navbar.find('a', text='자료검색')
         self.assertEqual(blog_btn.attrs['href'], '/book/')
 
         # About Me 버튼은 자기소개 페이지로 이동해야 한다.
-        about_me_btn = navbar.find('a', text='자료검색')
+        about_me_btn = navbar.find('a', text='도서관안내')
         self.assertEqual(about_me_btn.attrs['href'], '/book/')
 
     def category_card_test(self, soup):
         categories_card = soup.find('div', id='categories-card')
         self.assertIn('Categories', categories_card.text)
-        self.assertIn(f'{self.category_programming.name} '
-                      f'({self.category_programming.post_set.count()})',
+        self.assertIn(f'{self.category_programming.name} ({self.category_programming.book_set.count()})',
                       categories_card.text)
-        self.assertIn(f'{self.category_music.name} '
-                      f'({self.category_music.post_set.count()})',
+        self.assertIn(f'{self.category_music.name} ({self.category_music.book_set.count()})',
                       categories_card.text)
         self.assertIn(f'미분류 (1)', categories_card.text)
 
