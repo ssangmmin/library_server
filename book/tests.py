@@ -2,7 +2,7 @@ import self as self
 from django.test import TestCase, Client
 from bs4 import BeautifulSoup
 from django.contrib.auth.models import User
-from .models import Book
+from .models import Book, Category
 
 class TestView(TestCase):
     def setUp(self):
@@ -10,71 +10,115 @@ class TestView(TestCase):
         self.user_trump = User.objects.create_user(username='trump', password='somepassword')
         self.user_obama = User.objects.create_user(username='obama', password='somepassword')
 
-    def test_book_list(self):
-        #1.1 테스트 목록 페이지를 가져온다.
-        response = self.client.get('/book/')
+        self.category_progamming = Category.objects.create(name='programming', slug='programming')
+        self.category_music = Category.objects.create(name='music', slug='music')
 
-        #1.2 정삭적으로 페이지가 로드된다.
-        self.assertEqual(response.status_code, 200)
-
-        #1.3 페이지 타이틀은 '도서목록'이다.
-        soup = BeautifulSoup(response.content, 'html.parser')
-        self.assertEqual(soup.title.text, '도서목록')
-
-        #1.4 내비게이션 바가 있다
-        navbar = soup.nav
-
-        #1.5 "Home", "자료검색", "도서관안내" 라는 문구가 내비게이션 바에 있다.
-        self.assertIn('Home', navbar.text)
-        self.assertIn('자료검색', navbar.text)
-        self.assertIn('도서관안내', navbar.text)
-
-        #2.1 메인 영역에 게시물이 하나도 없다면 (count 함수 활용)
-        self.assertEqual(Book.objects.count(), 0)
-
-        #2.2 '아직 게시물이 없습니다'라는 문구가 보인다.
-        main_area = soup.find('div', id='main-area')
-        self.assertIn('아직 게시물이 없습니다', main_area.text)
-
-        #3.1 게시물 2개를 등록하고 2개가 등록되었는지 체크
-        book_001 = Book.objects.create(
+        self.book_001 = Book.objects.create(
             title='파친코1',
             book_author='이민진',
             publisher='문학사상',
             price='13000',
             release_date='2021-09-23',
             content='dadsjdasd',
-            author=self.user_trump
+            author=self.user_trump,
+            category=self.category_progamming,
+
 
         )
 
-        book_002 = Book.objects.create(
-            title='파친코2',
+        self.book_002 = Book.objects.create(
+            title='파친코1',
             book_author='이민진',
             publisher='문학사상',
             price='13000',
             release_date='2021-09-23',
             content='dadsjdasd',
-            author=self.user_obama
-        )
+            author=self.user_trump,
+            category=self.category_music,
 
-        self.assertEqual(Book.objects.count(), 2)
+        )
+        self.book_003 = Book.objects.create(
+            title='파친코1',
+            book_author='이민진',
+            publisher='문학사상',
+            price='13000',
+            release_date='2021-09-23',
+            content='카테고리가 없을수도 있죠',
+            author=self.user_obama,
+
+        )
+    def navbar_test(self, soup):
+        navbar = soup.nav
+        self.assertIn('도서관안내', navbar.text)
+        self.assertIn('자료검색', navbar.text)
+
+        #로고 버튼은 홈으로 이동해야 한다.
+        logo_btn = navbar.find('a', text='Do It Django')
+        self.assertEqual(logo_btn.attrs['href'], '/')
+
+        # Home 버튼은 홈으로 이동해야 한다.
+        home_btn = navbar.find('a', text='Home')
+        self.assertEqual(home_btn.attrs['href'], '/')
+
+        # Blog 버튼은 포스트 목록 페이지로 이동해야 한다.
+        blog_btn = navbar.find('a', text='도서관안내')
+        self.assertEqual(blog_btn.attrs['href'], '/book/')
+
+        # About Me 버튼은 자기소개 페이지로 이동해야 한다.
+        about_me_btn = navbar.find('a', text='자료검색')
+        self.assertEqual(about_me_btn.attrs['href'], '/book/')
+
+    def category_card_test(self, soup):
+        categories_card = soup.find('div', id='categories-card')
+        self.assertIn('Categories', categories_card.text)
+        self.assertIn(f'{self.category_programming.name} '
+                      f'({self.category_programming.post_set.count()})',
+                      categories_card.text)
+        self.assertIn(f'{self.category_music.name} '
+                      f'({self.category_music.post_set.count()})',
+                      categories_card.text)
+        self.assertIn(f'미분류 (1)', categories_card.text)
+
+
+    def test_book_list(self):
+        #포스트가 있는 경우
+        self.assertEqual(Book.objects.count(), 3)
 
         response = self.client.get('/book/')
-        soup = BeautifulSoup(response.content, 'html.parser')
         self.assertEqual(response.status_code, 200)
+        soup = BeautifulSoup(response.content, 'html.parser')
+
+        self.navbar_test(soup)
+        self.category_card_test(soup)
 
         main_area = soup.find('div', id='main-area')
-        self.assertIn(book_001.title, main_area.text)
-        self.assertIn(book_002.title, main_area.text)
-
-        #3.2 '아직 게시물이 없습니다'라는 문구는 더 이상 보이지 않는다.
         self.assertNotIn('아직 게시물이 없습니다', main_area.text)
+
+        book_001_card = main_area.find('div', id='book-1')
+        self.assertIn(self.book_001.title, book_001_card.text)
+        self.assertIn(self.book_001.category.name, book_001_card.text)
+
+        book_002_card = main_area.find('div', id='book-2')
+        self.assertIn(self.book_002.title, book_002_card.text)
+        self.assertIn(self.book_002.category.name, book_002_card.text)
+
+        book_003_card = main_area.find('div', id='book-3')
+        self.assertIn(self.book_003.title, book_003_card.text)
+        self.assertIn(self.book_003.category.name, book_003_card.text)
 
         self.assertIn(self.user_trump.username.upper(), main_area.text)
         self.assertIn(self.user_obama.username.upper(), main_area.text)
 
-        # 포스트 상세페이지 테스트
+        #도서가 없는 경우
+        Book.objects.all().delete()
+        self.assertEqual(Book.objects.count(), 0)
+        response = self.client.get('/book/')
+        soup = BeautifulSoup(response.content, 'html_parser')
+        main_area = soup.find('div', id='main-area')
+        self.assertIn('아직 게시물이 없습니다', main_area.text)
+
+
+    # 포스트 상세페이지 테스트
     def test_post_detail(self):
         #1.1 Book 하나 있다.
         book_001 = Book.objects.create(
