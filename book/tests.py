@@ -150,3 +150,19 @@ class TestView(TestCase):
 
         #2.6 첫 번째 도서의 내용(content)가 도서영역에 있다.
         self.assertIn(self.book_001.content, book_area.text)
+
+    def test_category_page(self):
+        response = self.client.get(self.category_programming.get_absolute_url())
+        self.assertEqual(response.status_code, 200)
+
+        soup = BeautifulSoup(response.content, 'html.parser')
+        self.navbar_test(soup)
+        self.category_card_test(soup)
+
+        self.assertIn(self.category_programming.name, soup.h1.text)
+
+        main_area = soup.find('div', id='main-area')
+        self.assertIn(self.category_programming.name, main_area.text)
+        self.assertIn(self.book_001.title, main_area.text)
+        self.assertNotIn(self.book_002.title, main_area.text)
+        self.assertNotIn(self.book_003.title, main_area.text)

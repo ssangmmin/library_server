@@ -44,4 +44,5 @@ class book_detail(DetailView):
 #             'b': book,
 #         }
 #     )
-#
+
+

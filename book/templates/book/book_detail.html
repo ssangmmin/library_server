@@ -7,14 +7,14 @@
 
 {% block main_area %}
 <!-- Page content-->
-<div class="book-area">
+<div>
     <div class="row">
-        <div>
+        <div id="book-area">
             <!-- Post content-->
             <article>
                 <!-- Category -->
                 {% if book.category %}
-                <span class="badge badge-secondary float-right">{{ book.category }} </span>
+                <span class="badge badge-secondary float-right">{{ book.category }}</span>
                 {% else %}
                 <span class="badge badge-secondary float-right">미분류 </span>
                 {% endif %}
