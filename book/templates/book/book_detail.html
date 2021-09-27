@@ -7,11 +7,17 @@
 
 {% block main_area %}
 <!-- Page content-->
-<div class="container mt-5">
+<div class="book-area">
     <div class="row">
         <div>
             <!-- Post content-->
             <article>
+                <!-- Category -->
+                {% if book.category %}
+                <span class="badge badge-secondary float-right">{{ book.category }} </span>
+                {% else %}
+                <span class="badge badge-secondary float-right">미분류 </span>
+                {% endif %}
 
                 <!-- Post header-->
                 <header class="mb-4">
@@ -20,9 +26,7 @@
                     <h5 class="text-muted">{{ book.hook_text }}</h5>
                     <!-- Post meta content-->
                     <div class="text-muted fst-italic mb-2">{{ book.created_at }}</div>
-                    <!-- Post categories-->
-                    <a class="badge bg-secondary text-decoration-none link-light" href="#!">Web Design</a>
-                    <a class="badge bg-secondary text-decoration-none link-light" href="#!">Freebies</a>
+                    <!-- Post categories -->
                     <p class="lead">by <a href="#">{{ book.author | upper }}</a></p>
 
                 </header>

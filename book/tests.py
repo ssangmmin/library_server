@@ -47,8 +47,8 @@ class TestView(TestCase):
             release_date='2021-09-23',
             content='카테고리가 없을수도 있죠',
             author=self.user_obama,
-
         )
+
     def navbar_test(self, soup):
         navbar = soup.nav
         self.assertIn('도서관안내', navbar.text)
@@ -104,7 +104,7 @@ class TestView(TestCase):
 
         book_003_card = main_area.find('div', id='book-3')
         self.assertIn(self.book_003.title, book_003_card.text)
-        self.assertIn(self.book_003.category.name, book_003_card.text)
+        self.assertIn(f'미분류', book_003_card.text)
 
         self.assertIn(self.user_trump.username.upper(), main_area.text)
         self.assertIn(self.user_obama.username.upper(), main_area.text)
@@ -113,48 +113,40 @@ class TestView(TestCase):
         Book.objects.all().delete()
         self.assertEqual(Book.objects.count(), 0)
         response = self.client.get('/book/')
-        soup = BeautifulSoup(response.content, 'html_parser')
+        soup = BeautifulSoup(response.content, 'html.parser')
         main_area = soup.find('div', id='main-area')
         self.assertIn('아직 게시물이 없습니다', main_area.text)
 
 
     # 포스트 상세페이지 테스트
-    def test_post_detail(self):
-        #1.1 Book 하나 있다.
-        book_001 = Book.objects.create(
-            title='파친코1',
-            book_author='이민진',
-            publisher='문학사상',
-            price='13000',
-            release_date='2021-09-23',
-            content='dadsjdasd',
-            author=self.user_trump
-        )
+    def test_book_detail(self):
+
 
         #1.2 그 포스트의 url은'book/1/'이다.
-        self.assertEqual(book_001.get_absolute_url(),'/book/1')
+        self.assertEqual(self.book_001.get_absolute_url(), '/book/1/')
 
         #2. 첫번째 포스트의 상세 페이지 테스트
         #2.1 첫번째 book url로 접근하면 정상적으로 작동한다(status code:200)
-        response = self.assertEqual(book_001.get_absolute_url())
+        response = self.client.get(self.book_001.get_absolute_url())
         self.assertEqual(response.status_code, 200)
         soup = BeautifulSoup(response.content, 'html.parser')
 
         #2.2 도서 목록 페이지와 똑같은 내비게이션 바가 있다.
-        navbar = soup.nav
-        self.assertIn('도서목록', navbar.text)
-        self.assertIn('자료검색', navbar.text)
+        self.navbar_test(soup)
+
+        self.category_card_test(soup)
 
         #2.3 첫 번째 도서의 제목이 웹 브라우저 탭 타이틀에 들어있다.
-        self.assertIn(book_001.title, soup.title.text)
+        self.assertIn(self.book_001.title, soup.title.text)
 
         #2.4 첫번째 도서의 제목이 도서 영역(book_area)에 있다.
         main_area = soup.find('div', id='main-area')
         book_area = main_area.find('div', id='book-area')
-        self.assertIn(book_001.title, book_area.text)
+        self.assertIn(self.book_001.title, book_area.text)
+        self.assertIn(self.category_programming.name, book_area.text)
 
         #2.5 첫 번째 도서의 작성자(author)가 도서영역에 있다.
         self.assertIn(self.user_trump.username.upper(), book_area.text)
 
         #2.6 첫 번째 도서의 내용(content)가 도서영역에 있다.
-        self.assertIn(book_001.content, book_area.text)
+        self.assertIn(self.book_001.content, book_area.text)
