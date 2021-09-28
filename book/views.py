@@ -24,7 +24,24 @@ class book_list(ListView):
 #             'books': books, #왼쪽은 templates에서 사용할 변수명
 #         }
 #     )
+def category_page(request, slug):
+    if slug == 'no_category':
+        category ='미분류'
+        book_list = Book.objects.filter(category=None)
+    else:
+        category = Category.objects.get(slug=slug)
+        book_list = Book.objects.filter(category=category)
 
+    return render(
+      request,
+            'book/book_list.html',
+        {
+                'book_list': book_list,
+                'categories': Category.objects.all(),
+                'no_category_book_count': Book.objects.filter(category=None).count(),
+                'category': category,
+        }
+    )
 class book_detail(DetailView):
     model = Book
 

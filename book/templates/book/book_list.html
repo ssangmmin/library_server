@@ -1,7 +1,10 @@
 {% extends 'book/base.html' %}
 
 {% block main_area %}
-
+<h1>도서목록 {% if category %}
+    <span class="badge badge-secondary">{{ category }}</span>
+    {% endif %}
+</h1>
 {% if book_list.exists %}
 {% for b in book_list %}
 <!-- Blog post -->
