@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from .models import Book, Category
+from .models import Book, Category, Tag
 from django.views.generic import ListView, DetailView
 
 
@@ -62,4 +62,18 @@ class book_detail(DetailView):
 #         }
 #     )
 
+def tag_page(request, slug):
+    tag = Tag.objects.get(slug=slug)
+    book_list = tag.book_set.all()
+
+    return render(
+        request,
+        'book/book_list.html',
+        {
+            'book_list': book_list,
+            'tag': tag,
+            'categories': Category.objects.all(),
+            'no_category_book_count': Book.objects.filter(category=None).count(),
+        }
+    )
 

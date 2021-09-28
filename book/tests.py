@@ -193,3 +193,21 @@ class TestView(TestCase):
         self.assertIn(self.book_001.title, main_area.text)
         self.assertNotIn(self.book_002.title, main_area.text)
         self.assertNotIn(self.book_003.title, main_area.text)
+
+    def test_tag_page(self):
+        response = self.client.get(self.tag_top.get_absolute_url())
+        self.assertEqual(response.status_code, 200)
+        soup = BeautifulSoup(response.content, 'html.parser')
+
+        self.navbar_test(soup)
+        self.category_card_test(soup)
+
+        self.assertIn(self.tag_top.name, soup.h1.text)
+
+        main_area = soup.find('div', id='main-area')
+        self.assertIn(self.tag_top.name, main_area.text)
+
+        self.assertIn(self.tag_top.name, main_area.text)
+        self.assertIn(self.book_001.title, main_area.text)
+        self.assertNotIn(self.book_002.title, main_area.text)
+        self.assertNotIn(self.book_003.title, main_area.text)
