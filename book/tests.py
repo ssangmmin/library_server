@@ -2,7 +2,7 @@ import self as self
 from django.test import TestCase, Client
 from bs4 import BeautifulSoup
 from django.contrib.auth.models import User
-from .models import Book, Category
+from .models import Book, Category, Tag
 
 class TestView(TestCase):
 
@@ -14,6 +14,11 @@ class TestView(TestCase):
 
         self.category_programming = Category.objects.create(name='programming', slug='programming')
         self.category_music = Category.objects.create(name='music', slug='music')
+
+        self.tag_seller = Tag.objects.create(name='베스트셀러', slug='베스트셀러')
+        self.tag_new = Tag.objects.create(name='신간', slug='신간')
+        self.tag_best = Tag.objects.create(name='월간베스트', slug='월간베스트')
+        self.tag_top = Tag.objects.create(name='Top10', slug='Top10')
 
         self.book_001 = Book.objects.create(
             title='파친코1',
@@ -27,9 +32,11 @@ class TestView(TestCase):
 
 
         )
+        self.book_001.tags.add(self.tag_seller)
+        self.book_001.tags.add(self.tag_top)
 
         self.book_002 = Book.objects.create(
-            title='파친코1',
+            title='파친코2',
             book_author='이민진',
             publisher='문학사상',
             price='13000',
@@ -39,8 +46,9 @@ class TestView(TestCase):
             category=self.category_music,
 
         )
+
         self.book_003 = Book.objects.create(
-            title='파친코1',
+            title='파친코3',
             book_author='이민진',
             publisher='문학사상',
             price='13000',
@@ -48,6 +56,8 @@ class TestView(TestCase):
             content='카테고리가 없을수도 있죠',
             author=self.user_obama,
         )
+        self.book_003.tags.add(self.tag_new)
+
 
     def navbar_test(self, soup):
         navbar = soup.nav
@@ -97,14 +107,26 @@ class TestView(TestCase):
         book_001_card = main_area.find('div', id='book-1')
         self.assertIn(self.book_001.title, book_001_card.text)
         self.assertIn(self.book_001.category.name, book_001_card.text)
+        self.assertIn(self.tag_seller.name, book_001_card.text)
+        self.assertIn(self.tag_top.name, book_001_card.text)
+        self.assertNotIn(self.tag_new.name, book_001_card.text)
+        self.assertNotIn(self.tag_best.name, book_001_card.text)
 
         book_002_card = main_area.find('div', id='book-2')
         self.assertIn(self.book_002.title, book_002_card.text)
         self.assertIn(self.book_002.category.name, book_002_card.text)
+        self.assertNotIn(self.tag_seller.name, book_002_card.text)
+        self.assertNotIn(self.tag_top.name, book_002_card.text)
+        self.assertNotIn(self.tag_new.name, book_002_card.text)
+        self.assertNotIn(self.tag_best.name, book_002_card.text)
 
         book_003_card = main_area.find('div', id='book-3')
         self.assertIn(self.book_003.title, book_003_card.text)
         self.assertIn(f'미분류', book_003_card.text)
+        self.assertIn(self.tag_new.name, book_003_card.text)
+        self.assertNotIn(self.tag_top.name, book_003_card.text)
+        self.assertNotIn(self.tag_seller.name, book_003_card.text)
+        self.assertNotIn(self.tag_best.name, book_003_card.text)
 
         self.assertIn(self.user_trump.username.upper(), main_area.text)
         self.assertIn(self.user_obama.username.upper(), main_area.text)
@@ -150,6 +172,11 @@ class TestView(TestCase):
 
         #2.6 첫 번째 도서의 내용(content)가 도서영역에 있다.
         self.assertIn(self.book_001.content, book_area.text)
+
+        self.assertIn(self.tag_seller.name, book_area.text)
+        self.assertIn(self.tag_top.name, book_area.text)
+        self.assertNotIn(self.tag_new.name, book_area.text)
+        self.assertNotIn(self.tag_best.name, book_area.text)
 
     def test_category_page(self):
         response = self.client.get(self.category_programming.get_absolute_url())

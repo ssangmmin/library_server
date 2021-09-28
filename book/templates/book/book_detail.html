@@ -39,6 +39,15 @@
                 <!-- Post content-->
                 <section class="mb-5"><p>{{ book.content }}</p></section>
 
+                {% if book.tags.exists %}
+                 <i class="fas fa-tags"></i>
+                {% for tag in book.tags.iterator %}
+                <a href="{{ tag.get_absolute_url }}"><span class="badge badge-pill badge-light">{{ tag }}</span></a>
+                {% endfor %}
+                <br/>
+                <br/>
+                {% endif %}
+
                 {% if book.file_upload %}
                 <a href="{{ book.file.upload.url }}" class="btn btn-info" role="button">
                     Download:
