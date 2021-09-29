@@ -12,6 +12,9 @@ class TestView(TestCase):
         self.user_trump = User.objects.create_user(username='trump', password='somepassword')
         self.user_obama = User.objects.create_user(username='obama', password='somepassword')
 
+        self.user_obama.is_staff = True
+        self.user_obama.save()
+
         self.category_programming = Category.objects.create(name='programming', slug='programming')
         self.category_music = Category.objects.create(name='music', slug='music')
 
@@ -48,7 +51,7 @@ class TestView(TestCase):
         )
 
         self.book_003 = Book.objects.create(
-            title='파친코3',
+            title='Book Form 만들기',
             book_author='이민진',
             publisher='문학사상',
             price='13000',
@@ -211,3 +214,37 @@ class TestView(TestCase):
         self.assertIn(self.book_001.title, main_area.text)
         self.assertNotIn(self.book_002.title, main_area.text)
         self.assertNotIn(self.book_003.title, main_area.text)
+
+    def test_create_book(self):
+
+        # 로그인하지 않으면 status_code가 200이면 안 된다!
+        response = self.client.get('/book/create_book/')
+        self.assertNotEqual(response.status_code, 200)
+        # staff가 아닌 trump가 로그인을 한다.
+        self.client.login(username='trump', password='somepassword')
+        response = self.client.get('/book/create_book/')
+        self.assertNotEqual(response.status_code, 200)
+        # staff인 obama로 로그인한다.
+        self.client.login(username='obama', password='somepassword')
+        response = self.client.get('/book/create_book/')
+        self.assertEqual(response.status_code, 200)
+        # 도서 추가 페이지의 제목이 'Create Book - Library' 이어야 한다.
+        soup = BeautifulSoup(response.content, 'html.parser')
+        self.assertEqual('Create Book - Library', soup.title.text)
+        # 도서 추가 페이지에 main-area 영역의 제목은 'Create New Book' 이어야 한다.
+        main_area = soup.find('div', id='main-area')
+        self.assertIn('Create New Book', main_area.text)
+        # Client의 객체를 이용하여 POST method 방식으로 글을 작성한다.
+        # 글 제목은 'Book Form 만들기', 내용은 여러분들 마음대로 작성하기
+        self.client.post(
+            {
+                'title': 'Book Form 만들기',
+                'content': '4124',
+            }
+        )
+
+        # 최근에 작성한 글을 last_book 변수를 선언하여 가져온다.
+        last_book = Book.objects.last()
+        # 제일 최근에 작성한 글의 제목과 작성자명을 비교하여 검증해본다.
+        self.assertEqual(last_book.title, 'Book Form 만들기')
+        self.assertEqual(last_book.author.username, 'obama')

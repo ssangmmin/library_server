@@ -1,6 +1,14 @@
 {% extends 'book/base.html' %}
 
 {% block main_area %}
+
+{% if user.is_authenticated %}
+    {% if user.is_superuser or user.is_staff %}
+    <a class="btn btn-info btn-sm float-right" href="/book/create_book/" role="button">
+        <i class="fas fa-pen"></i>&nbsp;&nbsp;New Book
+    </a>
+    {% endif %}
+{% endif %}
 <h1>도서목록 {% if category %}
     <span class="badge badge-secondary">{{ category }}</span>
     {% endif %}

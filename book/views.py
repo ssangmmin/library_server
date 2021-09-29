@@ -1,6 +1,7 @@
-from django.shortcuts import render
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.shortcuts import render, redirect
 from .models import Book, Category, Tag
-from django.views.generic import ListView, DetailView
+from django.views.generic import ListView, DetailView, CreateView
 
 
 class book_list(ListView):
@@ -76,4 +77,19 @@ def tag_page(request, slug):
             'no_category_book_count': Book.objects.filter(category=None).count(),
         }
     )
+
+class BookCreate(LoginRequiredMixin, UserPassesTestMixin, CreateView):
+    model = Book
+    fields = ['title', 'book_author', 'publisher', 'price', 'release_date', 'hook_text', 'content', 'head_image', 'file_upload', 'category']
+
+    def test_func(self):
+        return self.request.user.is_superuser or self.request.user.is_staff
+
+    def form_valid(self, form):
+        current_user = self.request.user
+        if current_user.is_authenticated and (current_user.is_staff or current_user.is_superuser):
+            form.instance.author = current_user
+            return super(BookCreate,self).form_valid(form)
+        else:
+            return redirect('/book/')
 
