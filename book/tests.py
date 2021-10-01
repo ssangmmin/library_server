@@ -234,17 +234,112 @@ class TestView(TestCase):
         # 도서 추가 페이지에 main-area 영역의 제목은 'Create New Book' 이어야 한다.
         main_area = soup.find('div', id='main-area')
         self.assertIn('Create New Book', main_area.text)
+
+        tag_str_input = main_area.find('input', id='id_tags_str')
+        self.assertTrue(tag_str_input)
+
         # Client의 객체를 이용하여 POST method 방식으로 글을 작성한다.
         # 글 제목은 'Book Form 만들기', 내용은 여러분들 마음대로 작성하기
         self.client.post(
+            '/book/create_book/',
             {
                 'title': 'Book Form 만들기',
+                'book_author': 'asdad',
                 'content': '4124',
+                'publisher' : 'sdasd',
+                'release_date': '2021-10-01',
+                'price': 34345,
+
+
+                'tags_str': 'new tag; 한글 태그, python'
             }
         )
 
+        self.assertEqual(Book.objects.count(), 4)
         # 최근에 작성한 글을 last_book 변수를 선언하여 가져온다.
         last_book = Book.objects.last()
         # 제일 최근에 작성한 글의 제목과 작성자명을 비교하여 검증해본다.
         self.assertEqual(last_book.title, 'Book Form 만들기')
         self.assertEqual(last_book.author.username, 'obama')
+
+        self.assertEqual(last_book.tags.count(), 3)
+        self.assertTrue(Tag.objects.get(name='new tag'))
+        self.assertTrue(Tag.objects.get(name='한글 태그'))
+        self.assertEqual(Tag.objects.count(), 7)
+
+    def test_update_book(self):
+        # setUp() 함수에서 작성한 첫 번째 도서 글을 수정하기 위해
+        # 주소를 작성하고 작성한 주소를 update_book_url 변수에 담는다.
+        update_book_url = f'/book/update_book/{self.book_001.pk}/'
+        # 로그인하지 않은 경우
+        # 로그인하지 않은 경우는 도서 수정페이지에 진입할 수 없다.
+        response = self.client.get(update_book_url)
+        self.assertNotEqual(response.status_code, 200)
+        # 로그인은 했지만 작성자가 아닌 경우
+        # 첫 번째 글을 작성한 작성자만 글을 수정할 수 있다.
+        # 도서 수정페이지는 특정 글의 작성자만 수정할 수 있는 권한을 가진다.
+        # (아래 코드는 트럼프 사용자가 작성되어 있는데, 첫 번째 도서를 추가하지 않은 작성자로 테스트 해주세요.)
+        self.assertNotEqual(self.book_001.author, self.user_obama)
+        self.client.login(
+            username=self.user_obama.username,
+            password='somepassword'
+        )
+        response = self.client.get(update_book_url)
+        # 서버에서 작성자를 비교하고 작성자가 다르다면 403 응답을
+        # 클라이언트로 보내게 된다.
+        self.assertEqual(response.status_code, 403)
+        # 작성자가 접근하는 경우
+        # 첫 번째 글을 작성한 작성자는 수정페이지에 접근이 가능하다.
+        self.client.login(
+            username=self.book_001.author.username,
+            password='somepassword'
+        )
+        response = self.client.get(update_book_url)
+        self.assertEqual(response.status_code, 200)
+        soup = BeautifulSoup(response.content, 'html.parser')
+        # 도서 수정페이지의 title은 'Edit Book - Blog' 이어야 한다.
+        self.assertEqual('Edit Book - Library', soup.title.text)
+        # main-area 영역에는 'Edit Book'라는 제목이 보여야 한다.
+        main_area = soup.find('div', id='main-area')
+        self.assertIn('Edit Book', main_area.text)
+        # 수정페이지에서 데이터베이스로부터 불러온 태그를 출력하는 input 태그를 찾아
+        # input 태그 객체를 tag_str_input 변수에 담는다.
+        tag_str_input = main_area.find('input', id='id_tags_str')
+        # tag_str_input 변수가 존재하는지 확인 (변수값이 null이 아니면 True)
+        self.assertTrue(tag_str_input)
+        # 불러온 글의 태그 2개가 정상적으로 태그 input 박스에 불러와졌는지 확인한다.
+        # input 태그의 value 속성은 현재 입력된 값을 나타낸다.
+        self.assertIn('베스트셀러; Top10', tag_str_input.attrs['value'])
+        # 글을 수정하기 위해 POST 방식으로 수정 내용을 서버로 전달한다.
+        # POST update_book_url 에 대한 처리는 장고가 자동으로 처리해준다.
+        # 두 번째 파라메터는 수정할 내용을 필드명과 수정내용 작성하여 딕셔너리
+        # 형태로 만든다.
+        # 세 번째 파라메터 follow=True는 글 수정 이후
+        # 테스트 코드에서 우리가 페이지 이동하는 코드를 작성하지 않더라도
+        # 수정페이지 이후 이동하는 페이지로 자동으로 이동하게 된다.
+        response = self.client.post(
+            update_book_url,
+            {
+                'title': '첫 번째 도서를 수정했습니다.',
+                'content': '최고의 베스트셀러 첫 번째 도서의 내용입니다.',
+                'category': self.category_music.pk,
+                'tags_str': '베스트셀러; Top10, 신간',
+                'book_author': 'asd',
+                'publisher': 'sdasd',
+                'release_date': '2021-10-01',
+                'price': 34345,
+            },
+            follow=True
+        )
+        # 수정페이지 이후 이동된 페이지 내용을 다시 읽어드린 후
+        # 해당 글의 제목과 내용이 수정됐는지를 도서 상세페이지에서
+        # 확인을 한다.
+        soup = BeautifulSoup(response.content, 'html.parser')
+        main_area = soup.find('div', id='main-area')
+        self.assertIn('첫 번째 도서를 수정했습니다.', main_area.text)
+        self.assertIn('최고의 베스트셀러 첫 번째 도서의 내용입니다.', main_area.text)
+        self.assertIn(self.category_music.name, main_area.text)
+        # 수정이 끝난 후 도서 상세 페이지에서 변경한 태그가 제대로 적용되었는지 확인
+        self.assertIn('베스트셀러', main_area.text)
+        self.assertIn('Top10', main_area.text)
+        self.assertIn('신간', main_area.text)

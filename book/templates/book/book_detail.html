@@ -27,7 +27,14 @@
                     <!-- Post meta content-->
                     <div class="text-muted fst-italic mb-2">{{ book.created_at }}</div>
                     <!-- Post categories -->
+                    <hr>
+                    {% if user.is_authenticated and user == book.author %}
+                            <a class="btn btn-info btn-sm float-right" href="/book/update_book/{{ book.pk }}/" role="button">
+                                <i class="fas fa-pen"></i> Edit Book
+                            </a>
+                    {% endif %}
                     <p class="lead">by <a href="#">{{ book.author | upper }}</a></p>
+
 
                 </header>
                 {% if book.head_image %}
