@@ -116,7 +116,7 @@ class BookCreate(LoginRequiredMixin, UserPassesTestMixin, CreateView):
 
 class BookUpdate(LoginRequiredMixin, UpdateView):
     model = Book
-    fields = ['title', 'book_author', 'publisher', 'price', 'release_date', 'hook_text', 'content', 'head_image', 'file_upload', 'category', 'tags']
+    fields = ['title', 'book_author', 'publisher', 'price', 'release_date', 'hook_text', 'content', 'head_image', 'file_upload', 'category']
 
     template_name = 'book/book_update_form.html'
 
