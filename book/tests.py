@@ -1,4 +1,4 @@
-import self as self
+
 from django.test import TestCase, Client
 from bs4 import BeautifulSoup
 from django.contrib.auth.models import User
@@ -249,8 +249,6 @@ class TestView(TestCase):
                 'publisher' : 'sdasd',
                 'release_date': '2021-10-01',
                 'price': 34345,
-
-
                 'tags_str': 'new tag; 한글 태그, python'
             }
         )
