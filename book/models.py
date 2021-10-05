@@ -1,5 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
+from markdown import markdown
+from markdownx.models import MarkdownxField
 import os
 
 
@@ -32,6 +34,8 @@ class Category(models.Model):
         verbose_name_plural = 'Categories'
 
 
+
+
 class Book(models.Model):
     title = models.CharField(max_length=30)
     book_author = models.CharField(max_length=128)
@@ -40,7 +44,7 @@ class Book(models.Model):
     release_date = models.DateTimeField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    content = models.CharField(max_length=1500)
+    content = MarkdownxField()
     hook_text = models.CharField(max_length=100, blank=True)
 
     author = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
@@ -64,3 +68,5 @@ class Book(models.Model):
     def get_file_ext(self):
         return self.get_file_name().split('.')[-1]
 
+    def get_content_markdown(self):
+        return markdown(self.content)

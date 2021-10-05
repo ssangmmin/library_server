@@ -44,7 +44,7 @@
                 {% endif %}
 
                 <!-- Post content-->
-                <section class="mb-5"><p>{{ book.content }}</p></section>
+                <section class="mb-5"><p>{{ book.get_content_markdown | safe }}</p></section>
 
                 {% if book.tags.exists %}
                  <i class="fas fa-tags"></i>
