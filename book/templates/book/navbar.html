@@ -1,4 +1,6 @@
 <!-- 내비게이션바 영역(992px보다 크면 메뉴 확장버튼 숨겨짐, 배경은 밝은색) -->
+
+{% load socialaccount %}
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
     <div class="container">
         <!-- 브랜드 명을 입력하는 부분 -->
@@ -31,33 +33,22 @@
                 </li>
 
                 <!-- 네번째 메뉴(드랍다운 메뉴) -->
+                {% if user.is_authenticated %}
                 <li class="nav-item dropdown">
-                    <!-- 트롭다운 메뉴를 펼쳤다 숨겼다 하는 버튼 -->
-                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown"
-                       aria-haspopup="true" aria-expanded="false">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown">
+                        {{ user.username }}
                     </a>
-                    <!-- 드롭다운 메뉴 구성 -->
-                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-
-                        <!-- 첫번째 메뉴 -->
-                        <a class="dropdown-item" href="#"></a>
-
-                        <!-- 두번재 메뉴 -->
-                        <a class="dropdown-item" href="/book/">도서관안내</a>
-
-                        <!-- 메뉴 구분선 -->
-                        <div class="dropdown-divider"></div>
-                        <!-- 세번째 메뉴 -->
-                        <a class="dropdown-item" href="#">Something else here</a>
+                    <div class="dropdown-menu">
+                        <a class="dropdown-item" href="/accounts/logout">Log Out</a>
                     </div>
                 </li>
-            </ul>
-            <!-- 내비게이션의 우측부분 -->
-            <!-- 로그인 버튼 -->
-            <ul class="navbar-nav ml-auto">
+                {% else %}
+                 <!-- 내비게이션의 우측부분 -->
+                <!-- 로그인 버튼 -->
                 <li class="nav-item">
                     <a class="nav-link" href="#" data-toggle="modal" data-target="#loginModal">Login In</a>
                 </li>
+                {% endif %}
             </ul>
         </div>
     </div>
@@ -77,11 +68,11 @@
             <div class="modal-body">
                 <div class="row">
                     <div class="col-md-6">
-                        <button type="button", class="btn btn-outline-dark btn-block btn-sm"><i class="fab fa-google google-icon"></i>&nbsp;&nbsp;Log in with Google</button>
-                        <button type="button", class="btn btn-outline-dark btn-block btn-sm"><i class="fas fa-envelope-square email-icon"></i>&nbsp;&nbsp;Log in with E-mail</button>
+                        <a role="button", class="btn btn-outline-dark btn-block btn-sm" href="{% provider_login_url 'google' %}"><i class="fab fa-google google-icon"></i>&nbsp;&nbsp;Log in with Google</a>
+                        <a role="button", class="btn btn-outline-dark btn-block btn-sm" href="/accounts/login/"><i class="fas fa-envelope-square email-icon"></i>&nbsp;&nbsp;Log in with Username</a>
                     </div>
                     <div class="col-md-6">
-                        <button type="button", class="btn btn-outline-dark btn-block btn-sm"><i class="fas fa-user-plus signup-icon"></i>&nbsp;&nbsp;Sign up with E-mail</button>
+                        <a role="button", class="btn btn-outline-dark btn-block btn-sm" href="/accounts/signup/"><i class="fas fa-user-plus signup-icon"></i>&nbsp;&nbsp;Sign up with E-mail</a>
                     </div>
                 </div>
             </div>
