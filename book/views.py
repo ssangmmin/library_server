@@ -1,8 +1,9 @@
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.core.exceptions import PermissionDenied
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.utils.text import slugify
 
+from .forms import ReviewForm
 from .models import Book, Category, Tag
 from django.views.generic import ListView, DetailView, CreateView, UpdateView
 
@@ -53,6 +54,7 @@ class book_detail(DetailView):
         context = super(book_detail, self).get_context_data()
         context['categories'] = Category.objects.all()
         context['no_category_book_count'] = Book.objects.filter(category=None).count()
+        context['review_form'] = ReviewForm
         return context
 
 # def book_detail(request, pk):
@@ -155,3 +157,32 @@ class BookUpdate(LoginRequiredMixin, UpdateView):
                 self.object.tags.add(tag)
 
         return response
+
+# 댓글 작성 POST 요청이 들어올 경우 처리
+def new_review(request, pk):
+
+    # 로그인한 경우
+    if request.user.is_authenticated:
+
+        book = get_object_or_404(Book, pk=pk)
+        if request.method == 'POST':
+            review_form = ReviewForm(request.POST)
+
+            if review_form.is_valid():
+
+                review = review_form.save(commit=False)
+                review.book = book
+
+                review.author = request.user
+
+                review.save()
+
+                return redirect(review.get_absolute_url())
+        else:
+            # POST 방식이 아닌 요청이 들어온 경우는
+            # 포스트 상세페이지로 다시 이동한다.
+            return redirect(book.get_absolute_url())
+    else:
+        # 로그인하지 않은 사용자가 접근한 경우는 PermissionDenied 예외를 발생시키고
+        # 허가거부 페이지를 응답으로 보내게 된다.
+        raise PermissionDenied

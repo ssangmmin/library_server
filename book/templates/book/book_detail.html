@@ -1,5 +1,5 @@
 {% extends 'book/base.html' %}
-
+{% load crispy_forms_tags %}
 {% block head_title %}
     {{ book.title }} - book
 {% endblock %}
@@ -81,7 +81,19 @@
                 <div class="card bg-light" id="review-area">
                     <div class="card-body">
                         <!-- Comment form-->
-                        <form class="mb-4"><textarea class="form-control" rows="3" placeholder="Join the discussion and leave a comment!"></textarea></form>
+                        {% if user.is_authenticated %}
+                        <form id="review-form" method="POST" action="{{ book.get_absolute_url }}new_review/">
+                            {% csrf_token %}
+                            <div class="form-group">
+                                {{ review_form | crispy }}
+                            </div>
+                            <button type="submit" class="btn btn-primary">Submit</button>
+                        </form>
+                        <br/>
+                        {% else %}
+                        <a role="button" class="btn btn-outline-dark btn-block btn-sm" href="#"
+                           data-toggle="modal" data-target="#loginModal">Log in and leave a review</a>
+                        {% endif %}
 
                         <!-- Single comment-->
                     {% if book.review_set.exists %}

@@ -75,7 +75,7 @@ class Book(models.Model):
 
 class Review(models.Model):
     # CASCADE이기 때문에 POST글이 삭제되면 댓글도 같이 삭제됩니다.
-    post = models.ForeignKey(Book, on_delete=models.CASCADE)
+    book = models.ForeignKey(Book, on_delete=models.CASCADE)
     author = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
     content = models.TextField()
     score = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)], default=1)
@@ -86,4 +86,4 @@ class Review(models.Model):
         return f'{self.author} :: {self.content}'
 
     def get_absolute_url(self):
-        return f'{self.book.get_absolute_url()}#comment-{self.pk}'
+        return f'{self.book.get_absolute_url()}#review-{self.pk}'
