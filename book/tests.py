@@ -358,160 +358,149 @@ class TestView(TestCase):
         self.assertIn('Top10', main_area.text)
         self.assertIn('신간', main_area.text)
 
-        # 댓글 작성 폼 테스트
-        def test_comment_form(self):
-            # Comment 테이블에 등록된 댓글의 전체 개수 확인하기
-            # setUp() 함수에서 작성한 댓글 하나만 존재하므로 총 댓글 개수는 1개
-            self.assertEqual(Review.objects.count(), 1)
 
-            # post_001 포스트 글에 추가된 댓글이 하나인지 테스트
-            self.assertEqual(self.book_001.review_set.count(), 1)
+    # 댓글 작성 폼 테스트
+    def test_review_form(self):
+        # Comment 테이블에 등록된 댓글의 전체 개수 확인하기
+        # setUp() 함수에서 작성한 댓글 하나만 존재하므로 총 댓글 개수는 1개
+        self.assertEqual(Review.objects.count(), 1)
 
-            # 로그인하지 않은 상태
-            # 로그인하지 않은 상태에서 첫 번재 포스트 상세페이지에 접속이 가능해야 한다.
-            response = self.client.get(self.book_001.get_absolute_url())
-            self.assertEqual(response.status_code, 200)
-            soup = BeautifulSoup(response.content, 'html.parser')
+        # post_001 포스트 글에 추가된 댓글이 하나인지 테스트
+        self.assertEqual(self.book_001.review_set.count(), 1)
 
-            # 댓글 영역을 찾아서
-            review_area = soup.find('div', id='review-area')
+        # 로그인하지 않은 상태
+        # 로그인하지 않은 상태에서 첫 번재 포스트 상세페이지에 접속이 가능해야 한다.
+        response = self.client.get(self.book_001.get_absolute_url())
+        self.assertEqual(response.status_code, 200)
+        soup = BeautifulSoup(response.content, 'html.parser')
 
-            # 댓글 영역에 [로그인해야 댓글을 남길 수 있다]는 안내문구가 표시되어야한다.
-            self.assertIn('Log in and leave a review', review_area.text)
+        # 댓글 영역을 찾아서
+        review_area = soup.find('div', id='review-area')
 
-            # 로그인 하지 않은 상태에서는 댓글 작성 form이 보이지 않아야한다.
-            self.assertFalse(review_area.find('form', id='review-form'))
+        # 댓글 영역에 [로그인해야 댓글을 남길 수 있다]는 안내문구가 표시되어야한다.
+        self.assertIn('Log in and leave a review', review_area.text)
 
-            # 로그인한 상태
-            # obama 사용자로 로그인 한다.
-            self.client.login(username='obama', password='somepassword')
-            # 로그인한 상태에서 첫 번재 포스트 글 상세페이지로 이동한다.
-            response = self.client.get(self.book_001.get_absolute_url())
-            self.assertEqual(response.status_code, 200)
-            soup = BeautifulSoup(response.content, 'html.parser')
+        # 로그인 하지 않은 상태에서는 댓글 작성 form이 보이지 않아야한다.
+        self.assertFalse(review_area.find('form', id='review-form'))
 
-            # 로그인한 상태이기 때문에 댓글 영역에 'Log in and leave a commnet'
-            # 메시지가 더이상 표시되지 않는다.
-            review_area = soup.find('div', id='review-area')
-            self.assertNotIn('Log in and leave a review', review_area.text)
 
-            # 로그인한 상태이기 때문에 댓글을 작성할 수 있는 영역이 노출된다.
-            # 작성한 댓글을 서버로 POST 요청을 보내기 위한 form 태그가 존재하는지 확인
-            review_form = review_area.find('form', id='review-form')
-            # 댓글을 작성하는 영역인 textarea 태그가 존재하는지 확인
-            self.assertTrue(review_form.find('textarea', id='id_content'))
+        # 로그인한 상태
+        # obama 사용자로 로그인 한다.
+        self.client.login(username='obama', password='somepassword')
+        # 로그인한 상태에서 첫 번재 포스트 글 상세페이지로 이동한다.
+        response = self.client.get(self.book_001.get_absolute_url())
+        self.assertEqual(response.status_code, 200)
+        soup = BeautifulSoup(response.content, 'html.parser')
 
-            # 최종적으로 작성한 댓글을 [포스트 상세페이지 주소 + new_review/] 주소로
-            # POST 방식으로 서버에 요청을 보낸다.
-            # follow가 True이기 대문에 서버로부터 응답을 받으면 다시 상세페이지로 접속을 하게된다.
-            response = self.client.post(
-                self.book_001.get_absolute_url() + 'new_review/',
-                {
-                    'content': "오바마의 댓글입니다.",
-                },
-                follow=True
-            )
+        # 로그인한 상태이기 때문에 댓글 영역에 'Log in and leave a commnet'
+        # 메시지가 더이상 표시되지 않는다.
+        review_area = soup.find('div', id='review-area')
+        self.assertNotIn('Log in and leave a review', review_area.text)
 
-            self.assertEqual(response.status_code, 200)
+        # 로그인한 상태이기 때문에 댓글을 작성할 수 있는 영역이 노출된다.
+        # 작성한 댓글을 서버로 POST 요청을 보내기 위한 form 태그가 존재하는지 확인
+        review_form = review_area.find('form', id='review-form')
+        # 댓글을 작성하는 영역인 textarea 태그가 존재하는지 확인
+        self.assertTrue(review_form.find('textarea', id='id_content'))
 
-            # 방금 위 코드에서 댓글 하나를 더 추가했으므로 전체 댓글의 수는 2개가 된다.
-            self.assertEqual(Review.objects.count(), 2)
+        # 최종적으로 작성한 댓글을 [포스트 상세페이지 주소 + new_comment/] 주소로
+        # POST 방식으로 서버에 요청을 보낸다.
+        # follow가 True이기 대문에 서버로부터 응답을 받으면 다시 상세페이지로 접속을 하게된다.
+        response = self.client.post(
+            self.book_001.get_absolute_url() + 'new_review/',
+            {
+                'score': 5,
+                'content' : "오바마의 댓글입니다.",
+            },
+            follow=True
+        )
 
-            # 첫 번째 포스트 글에 댓글 하나를 더 추가했으므로
-            # 첫 번째 포스트 글의 댓글 개수는 2개가 된다.
-            self.assertEqual(self.book_001.review_set.count(), 2)
+        self.assertEqual(response.status_code, 200)
 
-            # Comment 테이블에서 제일 마지막에 존재하는 레코드를 가져온 것이니
-            # 제일 최근에 작성한 댓글이고, 이 댓글 객체를 new_comment 변수에 담은 것이다.
-            new_review = Review.objects.last()
-            soup = BeautifulSoup(response.content, 'html.parser')
+        # 방금 위 코드에서 댓글 하나를 더 추가했으므로 전체 댓글의 수는 2개가 된다.
+        self.assertEqual(Review.objects.count(), 2)
 
-            # 최근 작성한 댓글의 객체를 이용해서 댓글을 작성한 포스트 글에 접근한 뒤
-            # 실제 페이지에 출력된 Post의 제목과 title 태그의 text를 비교한다.
-            # 이 테스트를 통과한다면 첫 번째 포스트 글의 댓글인 셈이다.
-            self.assertIn(new_review.book.title, soup.title.text)
+        # 첫 번째 포스트 글에 댓글 하나를 더 추가했으므로
+        # 첫 번째 포스트 글의 댓글 개수는 2개가 된다.
+        self.assertEqual(self.book_001.review_set.count(), 2)
 
-            # 댓글 영역을 찾아서 댓글 작성자와 내용이 일치하는지 확인하여 정상등록 됐는지 확인
-            review_area = soup.find('div', id='review-area')
-            new_review_div = review_area.find('div', id=f'review-{new_review.pk}')
-            self.assertIn('obama', new_review_div.text)
-            self.assertIn('오바마의 댓글입니다.', new_review_div.text)
+        # Comment 테이블에서 제일 마지막에 존재하는 레코드를 가져온 것이니
+        # 제일 최근에 작성한 댓글이고, 이 댓글 객체를 new_comment 변수에 담은 것이다.
+        new_review = Review.objects.last()
+        soup = BeautifulSoup(response.content, 'html.parser')
 
-    # def test_review_form(self):
-    #     # Comment 테이블에 등록된 댓글의 전체 개수 확인하기
-    #     # setUp() 함수에서 작성한 댓글 하나만 존재하므로 총 댓글 개수는 1개
-    #     self.assertEqual(Review.objects.count(), 1)
-    #
-    #     # post_001 포스트 글에 추가된 댓글이 하나인지 테스트
-    #     self.assertEqual(self.book_001.review_set.count(), 1)
-    #
-    #     # 로그인하지 않은 상태
-    #     # 로그인하지 않은 상태에서 첫 번재 포스트 상세페이지에 접속이 가능해야 한다.
-    #     response = self.client.get(self.book_001.get_absolute_url())
-    #     self.assertEqual(response.status_code, 200)
-    #     soup = BeautifulSoup(response.content, 'html.parser')
-    #
-    #     # 댓글 영역을 찾아서
-    #     review_area = soup.find('div', id='review-area')
-    #
-    #     # 댓글 영역에 [로그인해야 댓글을 남길 수 있다]는 안내문구가 표시되어야한다.
-    #     self.assertIn('Log in and leave a review', review_area.text)
-    #
-    #     # 로그인 하지 않은 상태에서는 댓글 작성 form이 보이지 않아야한다.
-    #     self.assertFalse(review_area.find('form', id='comment-form'))
-    #
-    #     # 로그인한 상태
-    #     # obama 사용자로 로그인 한다.
-    #     self.client.login(username='obama', password='somepassword')
-    #     # 로그인한 상태에서 첫 번재 포스트 글 상세페이지로 이동한다.
-    #     response = self.client.get(self.book_001.get_absolute_url())
-    #     self.assertEqual(response.status_code, 200)
-    #     soup = BeautifulSoup(response.content, 'html.parser')
-    #
-    #     # 로그인한 상태이기 때문에 댓글 영역에 'Log in and leave a commnet'
-    #     # 메시지가 더이상 표시되지 않는다.
-    #     review_area = soup.find('div', id='review-area')
-    #     self.assertNotIn('Log in and leave a comment', review_area.text)
-    #
-    #     # 로그인한 상태이기 때문에 댓글을 작성할 수 있는 영역이 노출된다.
-    #     # 작성한 댓글을 서버로 POST 요청을 보내기 위한 form 태그가 존재하는지 확인
-    #     review_form = review_area.find('form', id='review-form')
-    #     # 댓글을 작성하는 영역인 textarea 태그가 존재하는지 확인
-    #     self.assertTrue(review_form.find('textarea', id='id_content'))
-    #
-    #     # 최종적으로 작성한 댓글을 [포스트 상세페이지 주소 + new_comment/] 주소로
-    #     # POST 방식으로 서버에 요청을 보낸다.
-    #     # follow가 True이기 대문에 서버로부터 응답을 받으면 다시 상세페이지로 접속을 하게된다.
-    #     response = self.client.post(
-    #         self.book_001.get_absolute_url() + 'new_review/',
-    #         {
-    #             'content': "오바마의 댓글입니다.",
-    #
-    #         },
-    #         follow=True
-    #     )
-    #
-    #     self.assertEqual(response.status_code, 200)
-    #
-    #     # 방금 위 코드에서 댓글 하나를 더 추가했으므로 전체 댓글의 수는 2개가 된다.
-    #     self.assertEqual(Review.objects.count(), 2)
-    #
-    #     # 첫 번째 포스트 글에 댓글 하나를 더 추가했으므로
-    #     # 첫 번째 포스트 글의 댓글 개수는 2개가 된다.
-    #     self.assertEqual(self.book_001.comment_set.count(), 2)
-    #
-    #     # Comment 테이블에서 제일 마지막에 존재하는 레코드를 가져온 것이니
-    #     # 제일 최근에 작성한 댓글이고, 이 댓글 객체를 new_comment 변수에 담은 것이다.
-    #     new_review = Review.objects.last()
-    #     soup = BeautifulSoup(response.content, 'html.parser')
-    #
-    #     # 최근 작성한 댓글의 객체를 이용해서 댓글을 작성한 포스트 글에 접근한 뒤
-    #     # 실제 페이지에 출력된 Post의 제목과 title 태그의 text를 비교한다.
-    #     # 이 테스트를 통과한다면 첫 번째 포스트 글의 댓글인 셈이다.
-    #     self.assertIn(new_review.book.title, soup.title.text)
-    #
-    #     # 댓글 영역을 찾아서 댓글 작성자와 내용이 일치하는지 확인하여 정상등록 됐는지 확인
-    #     review_area = soup.find('div', id='review-area')
-    #     new_review_div = review_area.find('div', id=f'comment-{new_review.pk}')
-    #     self.assertIn('obama', new_review_div.text)
-    #     self.assertIn('오바마의 댓글입니다.', new_review_div.text)
+        # 최근 작성한 댓글의 객체를 이용해서 댓글을 작성한 포스트 글에 접근한 뒤
+        # 실제 페이지에 출력된 Post의 제목과 title 태그의 text를 비교한다.
+        # 이 테스트를 통과한다면 첫 번째 포스트 글의 댓글인 셈이다.
+        self.assertIn(new_review.book.title, soup.title.text)
+
+        # 댓글 영역을 찾아서 댓글 작성자와 내용이 일치하는지 확인하여 정상등록 됐는지 확인
+        review_area = soup.find('div', id='review-area')
+        new_review_div = review_area.find('div', id=f'review-{new_review.pk}')
+        self.assertIn('obama', new_review_div.text)
+        self.assertIn('오바마의 댓글입니다.', new_review_div.text)
+
+
+
+    def test_review_update(self):
+        # 코멘트 생성
+        review_by_trump = Review.objects.create(
+            book = self.book_001,
+            author = self.user_trump,
+            content = '트럼프의 댓글입니다.'
+        )
+
+        # 1번글 접속 확인
+        response = self.client.get(self.book_001.get_absolute_url())
+        self.assertEqual(response.status_code, 200)
+        soup = BeautifulSoup(response.content, 'html.parser')
+
+        # 댓글 영역에서 update-btn 찾는데
+        # 화면에 보이면 안됨 (assertFalse)
+        review_area = soup.find('div', id='review-area')
+        self.assertFalse(review_area.find('a', id='review-1-update-btn'))
+        self.assertFalse(review_area.find('a', id='review-2-update-btn'))
+
+        # 오바마로 로그인한 상태
+        self.client.login(username='obama', password='somepassword')
+        response = self.client.get(self.book_001.get_absolute_url())
+        self.assertEqual(response.status_code, 200)
+        soup = BeautifulSoup(response.content, 'html.parser')
+
+        # 댓글영역 확인
+        # 트럼프가 작성한 댓글 업데이트 버튼 2번이 없어야함 왜냐면 지금 오바마로 로그인한 상태이기 때문
+        review_area = soup.find('div', id='review-area')
+        self.assertFalse(review_area.find('a', id='review-2-update-btn'))
+        review_001_update_btn = review_area.find('a', id='review-1-update-btn')
+        self.assertIn('edit', review_001_update_btn.text)
+        self.assertEqual(review_001_update_btn.attrs['href'], '/book/update_review/1/')
+
+        # 'edit' 버튼이 있는지 확인
+        # 'edit' 경로가 '/book/update_comment/1/'이랑 같은지 확인
+        self.assertIn('edit', review_001_update_btn.text)
+        self.assertEqual(review_001_update_btn.attrs['href'], '/book/update_review/1/')
+
+        response = self.client.get('/book/update_review/1/')
+        self.assertEqual(response.status_code, 200)
+        soup = BeautifulSoup(response.content, 'html.parser')
+
+        self.assertEqual('Edit Review - Book', soup.title.text)
+        update_review_form = soup.find('form', id='review-form')
+        content_textarea = update_review_form.find('textarea', id='id_content')
+        self.assertIn(self.review_001.content, content_textarea.text)
+
+        response = self.client.post(
+            f'/book/update_review/{self.review_001.pk}/',
+            {
+                'score' : 5,
+                'content' : "오바마의 댓글을 수정합니다.",
+            },
+
+            follow=True
+        )
+
+        self.assertEqual(response.status_code, 200)
+        soup = BeautifulSoup(response.content, 'html.parser')
+        review_001_div = soup.find('div', id='review-1')
+        self.assertIn('오바마의 댓글을 수정합니다.', review_001_div.text)
+        self.assertIn('Updated: ', review_001_div.text)

@@ -4,7 +4,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.utils.text import slugify
 
 from .forms import ReviewForm
-from .models import Book, Category, Tag
+from .models import Book, Category, Tag, Review
 from django.views.generic import ListView, DetailView, CreateView, UpdateView
 
 
@@ -163,20 +163,32 @@ def new_review(request, pk):
 
     # 로그인한 경우
     if request.user.is_authenticated:
-
+        # 요청받은 주소에서 pk 번호를 이용해 Post 테이블을 조회
+        # 해당 pk를 가지는 포스트가 존재한다면 get 동작 수행
+        # 그렇지 않으면 404 예외발생하여 코드 실행을 중단하고
+        # 클라이언트에게 404 응답을 보내게 된다.
         book = get_object_or_404(Book, pk=pk)
+
+        # request 요청 내용 중 method 변수를 확인하여
+        # POST 요청인지 확인한다.
         if request.method == 'POST':
+            # CommentForm에 POST 요청받은 내용을 담아 form 객체를 생성
             review_form = ReviewForm(request.POST)
-
+            # form 객체 내부의 is_valid() 함수를 실행하여 유효성 검사 후
+            # 이상이 없다면 if문 실행
             if review_form.is_valid():
-
+                # comment_form에 담긴 내용을 DB에 저장하는 동작은 하지만
+                # 트랜젝션(Transaction)은 이뤄지지 않았다. (commit=False)
+                # comment 변수에는 Comment 객체가 담겨져 있다.
                 review = review_form.save(commit=False)
+                # comment 객체에 post 필드를 채워준다. (처음 pk로 불러온 Post)
                 review.book = book
-
+                # author 필드는 현재 로그인한 사용자의 객체를 담는다.
                 review.author = request.user
-
+                # comment 객체의 모든 내용을 채웠으므로
+                # 최종적으로 데이터베이스에 저장한다. 트랜젝션이 이루어진다.
                 review.save()
-
+                # 댓글이 작성된 곳으로 페이지 이동한다.
                 return redirect(review.get_absolute_url())
         else:
             # POST 방식이 아닌 요청이 들어온 경우는
@@ -186,3 +198,14 @@ def new_review(request, pk):
         # 로그인하지 않은 사용자가 접근한 경우는 PermissionDenied 예외를 발생시키고
         # 허가거부 페이지를 응답으로 보내게 된다.
         raise PermissionDenied
+
+
+class ReviewUpdate(LoginRequiredMixin, UpdateView):
+    model = Review
+    form_class = ReviewForm
+
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_authenticated and request.user == self.get_object().author: # 현재 댓글을 작성한 작성자
+            return super(ReviewUpdate, self).dispatch(request, *args, **kwargs)
+        else:
+            raise PermissionDenied
