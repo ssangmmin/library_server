@@ -2,7 +2,8 @@
 from django.test import TestCase, Client
 from bs4 import BeautifulSoup
 from django.contrib.auth.models import User
-from .models import Book, Category, Tag
+from .models import Book, Category, Tag, Review
+
 
 class TestView(TestCase):
 
@@ -61,6 +62,12 @@ class TestView(TestCase):
         )
         self.book_003.tags.add(self.tag_new)
 
+        # 첫번재 리뷰
+        self.review_001 = Review.objects.create(
+            post=self.book_001,
+            author=self.user_obama,
+            content='첫 번째 댓글입니다.'
+        )
 
     def navbar_test(self, soup):
         navbar = soup.nav
@@ -180,6 +187,15 @@ class TestView(TestCase):
         self.assertIn(self.tag_top.name, book_area.text)
         self.assertNotIn(self.tag_new.name, book_area.text)
         self.assertNotIn(self.tag_best.name, book_area.text)
+
+        # review area
+        self.assertEqual(Review.objects.count(), 1)
+
+        reviews_area = soup.find('div', id='review-area')
+        review_001_area = reviews_area.find('div', id='review-1')
+        self.assertIn(self.review_001.author.username, review_001_area.text)
+        self.assertIn(self.review_001.content, review_001_area.text)
+
 
     def test_category_page(self):
         response = self.client.get(self.category_programming.get_absolute_url())
