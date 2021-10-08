@@ -209,3 +209,13 @@ class ReviewUpdate(LoginRequiredMixin, UpdateView):
             return super(ReviewUpdate, self).dispatch(request, *args, **kwargs)
         else:
             raise PermissionDenied
+
+
+def delete_review(request, pk):
+    review = get_object_or_404(Review, pk=pk)
+    book = review.book
+    if request.user.is_authenticated and request.user == review.author:
+        review.delete()
+        return redirect(book.get_absolute_url())
+    else:
+        raise PermissionDenied

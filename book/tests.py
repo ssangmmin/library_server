@@ -504,3 +504,66 @@ class TestView(TestCase):
         review_001_div = soup.find('div', id='review-1')
         self.assertIn('오바마의 댓글을 수정합니다.', review_001_div.text)
         self.assertIn('Updated: ', review_001_div.text)
+
+
+
+    def test_delete_review(self):
+        review_by_trump = Review.objects.create(
+            book=self.book_001,
+            author=self.user_trump,
+            content='트럼프의 댓글입니다.'
+        )
+
+        # 댓글이 2개인 이유는 setUp()에서의 댓글 + 위에 코드
+        # setUp()함수에 적힌 것들은 저장된 상태이고
+        # 다른 함수들은 x
+        self.assertEqual(Review.objects.count(), 2)
+        self.assertEqual(self.book_001.review_set.count(), 2)
+
+        #로그인 하지 않은 상태
+        response = self.client.get(self.book_001.get_absolute_url())
+        self.assertEqual(response.status_code, 200)
+        soup = BeautifulSoup(response.content, 'html.parser')
+
+        review_area = soup.find('div', id='review-area')
+        self.assertFalse(review_area.find('a', id='review-1-delete-btn'))
+        self.assertFalse(review_area.find('a', id='review-2-delete-btn'))
+
+        # trump로 로그인한 상태
+        self.client.login(username='trump', password='somepassword')
+        response = self.client.get(self.book_001.get_absolute_url())
+        self.assertEqual(response.status_code, 200)
+        soup = BeautifulSoup(response.content, 'html.parser')
+
+        review_area = soup.find('div', id='review-area')
+        # trump로 로그인 했는데 obama댓글 삭제버튼이 보이면 안됨
+        self.assertFalse(review_area.find('a', id='review-1-delete-btn'))
+        review_002_delete_modal_btn = review_area.find(
+            'a', id='review-2-delete-modal-btn'
+        )
+        self.assertIn('delete', review_002_delete_modal_btn.text)
+        self.assertEqual(
+            review_002_delete_modal_btn.attrs['data-target'],
+            '#deleteReviewModal-2'
+        )
+
+        # 모달창 생성
+        delete_review_modal_002 = soup.find('div', id='deleteReviewModal-2')
+        self.assertIn('Are You Sure?', delete_review_modal_002.text)
+        # 삭제 버튼
+        really_delete_btn_002 = delete_review_modal_002.find('a')
+        self.assertIn('Delete', really_delete_btn_002.text)
+        self.assertEqual(
+            really_delete_btn_002.attrs['href'],
+            '/book/delete_review/2/'
+        )
+
+        response = self.client.get('/book/delete_review/2/', follow=True)
+        self.assertEqual(response.status_code, 200)
+        soup = BeautifulSoup(response.content, 'html.parser')
+        self.assertIn(self.book_001.title, soup.title.text)
+        review_area = soup.find('div', id='review-area')
+        self.assertNotIn('트럼프의 댓글입니다.', review_area.text)
+
+        self.assertEqual(Review.objects.count(), 1)
+        self.assertEqual(self.book_001.review_set.count(), 1)

@@ -100,25 +100,58 @@
                         {% for review in book.review_set.iterator %}
                         <div class="d-flex" id="review-{{ review.pk }}">
                             <div class="flex-shrink-0"><img class="rounded-circle" src="https://dummyimage.com/50x50/ced4da/6c757d.jpg" alt="..." /></div>
-                            <div class="ms-3">
+                            <div class="mr-auto">
+                                <div class="fw-bold">{{ review.author.username }} &nbsp;&nbsp;
+                                    <small class="text-muted">{{ review.created_at }}</small>
+                                </div>
+                                {{ review.content | linebreaks }}
+                            </div>
                                 {% if user.is_authenticated and review.author == user %}
+                            <div>
                                     <a role ="button" class="btn btn-sm btn-info float-right"
                                         id ="review-{{ review.pk }}-update-btn"
                                         href="/book/update_review/{{ review.pk }}/">
                                         edit
                                     </a>
-                                {% endif %}
-                                <div class="fw-bold">{{ review.author.username }} &nbsp;&nbsp;<small class="text-muted">{{ review.created_at }}</small></div>
-                                {{ review.content | linebreaks }}
-                                {% if review.created_at != review.modified_at %}
-                                <p class="text-muted float-right"><small>Updated: {{ review.modified_at }}</small></p>
+                                    <a role="button"
+                                        href="#"
+                                        id="review-{{ review.pk }}-delete-modal-btn"
+                                        class="btn btn-sm btn-danger"
+                                        data-toggle="modal"
+                                        data-target="#deleteReviewModal-{{ review.pk }}">delete</a>
                                 {% endif %}
                             </div>
+
+                            <!-- Modal -->
+                            <div class="modal fade" id="deleteReviewModal-{{ review.pk }}" tabindex="-1" role="dialog" aria-labelledby="deleteReviewModalLabel" aria-hidden="True">
+                                <div class="modal-dialog" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="deleteModalLabel">Are You Sure?</h5>
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <del>{{ review | linebreaks }}</del>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                                            <a role="button" class="btn btn-danger" href="/book/delete_review/{{ review.pk }}/">Delete</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
+                        <div>
+                            {% if review.created_at != review.modified_at %}
+                            <p class="text-muted text-right"><small>Updated: {{ review.modified_at }}</small></p>
+                            {% endif %}
+                        </div>
+                        <hr/>
                         {% endfor %}
                         {% endif %}
                     </div>
-                    <hr/>
                 </div>
             </section>
         </div>
