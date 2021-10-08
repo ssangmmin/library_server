@@ -187,6 +187,7 @@ def new_review(request, pk):
                 review.author = request.user
                 # comment 객체의 모든 내용을 채웠으므로
                 # 최종적으로 데이터베이스에 저장한다. 트랜젝션이 이루어진다.
+                review.score = request.POST.get('my_score')
                 review.save()
                 # 댓글이 작성된 곳으로 페이지 이동한다.
                 return redirect(review.get_absolute_url())
@@ -209,6 +210,19 @@ class ReviewUpdate(LoginRequiredMixin, UpdateView):
             return super(ReviewUpdate, self).dispatch(request, *args, **kwargs)
         else:
             raise PermissionDenied
+
+    def form_valid(self, form):
+        response = super(ReviewUpdate, self).form_valid(form)
+        my_score = self.request.POST.get('my_score')
+
+        if my_score and (0 < int(my_score) <= 5):
+            self.object.score = my_score
+            self.object.save()
+
+        else:
+            raise ValueError('별점은 1~5점을 입력하셔야 합니다.')
+
+        return response
 
 
 def delete_review(request, pk):

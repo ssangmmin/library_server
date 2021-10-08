@@ -409,7 +409,7 @@ class TestView(TestCase):
         response = self.client.post(
             self.book_001.get_absolute_url() + 'new_review/',
             {
-                'score': 5,
+                'my_score': 2,
                 'content' : "오바마의 댓글입니다.",
             },
             follow=True
@@ -492,7 +492,7 @@ class TestView(TestCase):
         response = self.client.post(
             f'/book/update_review/{self.review_001.pk}/',
             {
-                'score' : 5,
+                'my_score' : 3,
                 'content' : "오바마의 댓글을 수정합니다.",
             },
 
