@@ -83,7 +83,7 @@ class Review(models.Model):
     modified_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f'{self.author} :: {self.content}'
+        return f'{self.author} :: {self.content} :: {self.score}'
 
     def get_absolute_url(self):
         return f'{self.book.get_absolute_url()}#review-{self.pk}'

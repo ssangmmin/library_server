@@ -1,7 +1,7 @@
 {% extends 'book/base.html' %}
 {% load crispy_forms_tags %}
 {% block head_title %}
-    {{ book.title }} - book
+{{ book.title }} - book
 {% endblock %}
 
 
@@ -9,9 +9,9 @@
 <!-- Page content-->
 <div>
     <div class="row">
-        <div id="book-area">
-            <!-- Post content-->
-            <article>
+        <div>
+            <div id="book-area">
+                <!-- Post content-->
                 <!-- Category -->
                 {% if book.category %}
                 <span class="badge badge-secondary float-right">{{ book.category }}</span>
@@ -19,107 +19,115 @@
                 <span class="badge badge-secondary float-right">미분류 </span>
                 {% endif %}
 
-                <!-- Post header-->
-                <header class="mb-4">
-                    <!-- Post title-->
-                    <h1 class="fw-bolder mb-1">{{ book.title }}</h1>
-                    <h5 class="text-muted">{{ book.hook_text }}</h5>
-                    <!-- Post meta content-->
-                    <div class="text-muted fst-italic mb-2">{{ book.created_at }}</div>
-                    <!-- Post categories -->
-                    <hr>
-                    {% if user.is_authenticated and user == book.author %}
-                            <a class="btn btn-info btn-sm float-right" href="/book/update_book/{{ book.pk }}/" role="button">
-                                <i class="fas fa-pen"></i> Edit Book
-                            </a>
-                    {% endif %}
-                    <p class="lead">by <a href="#">{{ book.author | upper }}</a></p>
+                <article>
+                    <!-- Post header-->
+                    <header class="mb-4">
+                        <!-- Post title-->
+                        <h1 class="fw-bolder mb-1">{{ book.title }}</h1>
+                        <h5 class="text-muted">{{ book.hook_text }}</h5>
+                        <!-- Post meta content-->
+                        <div class="text-muted fst-italic mb-2">{{ book.created_at }}</div>
+                        <!-- Post categories -->
+                        <hr>
+                        {% if user.is_authenticated and user == book.author %}
+                        <a class="btn btn-info btn-sm float-right" href="/book/update_book/{{ book.pk }}/" role="button">
+                            <i class="fas fa-pen"></i> Edit Book
+                        </a>
+                        {% endif %}
+                        <p class="lead">by <a href="#">{{ book.author | upper }}</a></p>
 
 
-                </header>
-                {% if book.head_image %}
-                <img class="img-fluid rounded" src="{{ book.head_image.url }}" alt="{{ book.title }}" head_image>
-                {% else %}
-                <img class="img-fluid rounded" src="https://picsum.photos/seed/{{ book.id }}/800/200" alt="random_image">
-                {% endif %}
-
-                <!-- Post content-->
-                <section class="mb-5"><p>{{ book.get_content_markdown | safe }}</p></section>
-
-                {% if book.tags.exists %}
-                 <i class="fas fa-tags"></i>
-                {% for tag in book.tags.iterator %}
-                <a href="{{ tag.get_absolute_url }}"><span class="badge badge-pill badge-light">{{ tag }}</span></a>
-                {% endfor %}
-                <br/>
-                <br/>
-                {% endif %}
-
-                {% if book.file_upload %}
-                <a href="{{ book.file.upload.url }}" class="btn btn-info" role="button">
-                    Download:
-                    {% if book.get_file_ext == 'csv' %}
-                    <i class="fas fa-file-csv"></i>
-                    {% elif book.get_file_ext == 'xlsx' or book.get_file_ext == 'xls' %}
-                    <i class="fas fa-file-excel"></i>
-                    {% elif book.get_file_ext == 'docx' or book.get_file_ext == 'doc' %}
-                    <i class="fas fa-file=word"></i>
+                    </header>
+                    {% if book.head_image %}
+                    <img class="img-fluid rounded" src="{{ book.head_image.url }}" alt="{{ book.title }}" head_image>
                     {% else %}
-                    <i class="far fa-file"></i>
+                    <img class="img-fluid rounded" src="https://picsum.photos/seed/{{ book.id }}/800/200" alt="random_image">
                     {% endif %}
-                </a>
-                {% endif %}
 
+                    <!-- Post content-->
+                    <section class="mb-5"><p>{{ book.get_content_markdown | safe }}</p></section>
 
+                    {% if book.tags.exists %}
+                    <i class="fas fa-tags"></i>
+                    {% for tag in book.tags.iterator %}
+                    <a href="{{ tag.get_absolute_url }}"><span class="badge badge-pill badge-light">{{ tag }}</span></a>
+                    {% endfor %}
+                    <br/>
+                    <br/>
+                    {% endif %}
 
-
-            </article>
+                    {% if book.file_upload %}
+                    <a href="{{ book.file.upload.url }}" class="btn btn-info" role="button">
+                        Download:
+                        {% if book.get_file_ext == 'csv' %}
+                        <i class="fas fa-file-csv"></i>
+                        {% elif book.get_file_ext == 'xlsx' or book.get_file_ext == 'xls' %}
+                        <i class="fas fa-file-excel"></i>
+                        {% elif book.get_file_ext == 'docx' or book.get_file_ext == 'doc' %}
+                        <i class="fas fa-file=word"></i>
+                        {% else %}
+                        <i class="far fa-file"></i>
+                        {% endif %}
+                    </a>
+                    {% endif %}
+                </article>
+            </div>
 
 
             <!-- Comments section-->
-            <section class="mb-5">
-                <div class="card bg-light" id="review-area">
-                    <div class="card-body">
-                        <!-- Comment form-->
-                        {% if user.is_authenticated %}
-                        <form id="review-form" method="POST" action="{{ book.get_absolute_url }}new_review/">
-                            {% csrf_token %}
-                            <div class="form-group">
-                                {{ review_form | crispy }}
-                            </div>
-                            <button type="submit" class="btn btn-primary">Submit</button>
-                        </form>
-                        <br/>
-                        {% else %}
-                        <a role="button" class="btn btn-outline-dark btn-block btn-sm" href="#"
-                           data-toggle="modal" data-target="#loginModal">Log in and leave a review</a>
-                        {% endif %}
-
-                        <!-- Single comment-->
-                        {% if book.review_set.exists %}
-                        {% for review in book.review_set.iterator %}
-                        <div class="d-flex" id="review-{{ review.pk }}">
-                            <div class="flex-shrink-0"><img class="rounded-circle" src="https://dummyimage.com/50x50/ced4da/6c757d.jpg" alt="..." /></div>
-                            <div class="mr-auto">
-                                <div class="fw-bold">{{ review.author.username }} &nbsp;&nbsp;
-                                    <small class="text-muted">{{ review.created_at }}</small>
+            <div id="review-area">
+                <section class="mb-5">
+                    <div class="card bg-light">
+                        <div class="card-body">
+                            <!-- Comment form-->
+                            {% if user.is_authenticated %}
+                            <form id="review-form" method="POST" action="{{ book.get_absolute_url }}new_review/">
+                                {% csrf_token %}
+                                <div class="form-group">
+                                    {{ review_form | crispy }}
                                 </div>
-                                {{ review.content | linebreaks }}
-                            </div>
-                                {% if user.is_authenticated and review.author == user %}
-                            <div>
-                                    <a role ="button" class="btn btn-sm btn-info float-right"
-                                        id ="review-{{ review.pk }}-update-btn"
-                                        href="/book/update_review/{{ review.pk }}/">
-                                        edit
-                                    </a>
-                                    <a role="button"
-                                        href="#"
-                                        id="review-{{ review.pk }}-delete-modal-btn"
-                                        class="btn btn-sm btn-danger"
-                                        data-toggle="modal"
-                                        data-target="#deleteReviewModal-{{ review.pk }}">delete</a>
-                                {% endif %}
+                                <button type="submit" class="btn btn-primary">Submit</button>
+                            </form>
+                            <br/>
+                            {% else %}
+                            <a role="button" class="btn btn-outline-dark btn-block btn-sm" href="#"
+                               data-toggle="modal" data-target="#loginModal">Log in and leave a review
+                            </a>
+                            {% endif %}
+
+                            <!-- Single comment-->
+                            {% if book.review_set.exists %}
+                            {% for review in book.review_set.iterator %}
+                            <div id="review-{{ review.pk }}">
+                                <div class="d-flex">
+                                    <div class="flex-shrink-0"><img class="rounded-circle" src="https://dummyimage.com/50x50/ced4da/6c757d.jpg" alt="..." /></div>
+                                    <div class="mr-auto">
+                                        <div class="fw-bold">{{ review.author.username }} &nbsp;&nbsp;
+                                            <small class="text-muted">{{ review.created_at }}</small>
+                                        </div>
+                                        {{ review.content | linebreaks }}
+                                    </div>
+                                    {% if user.is_authenticated and review.author == user %}
+                                    <div>
+                                        <a role ="button" class="btn btn-sm btn-info float-right"
+                                           id ="review-{{ review.pk }}-update-btn"
+                                           href="/book/update_review/{{ review.pk }}/">
+                                            edit
+                                        </a>
+                                        <a role="button"
+                                           href="#"
+                                           id="review-{{ review.pk }}-delete-modal-btn"
+                                           class="btn btn-sm btn-danger"
+                                           data-toggle="modal"
+                                           data-target="#deleteReviewModal-{{ review.pk }}">delete</a>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                <div>
+                                    {% if review.created_at != review.modified_at %}
+                                    <p class="text-muted text-right"><small>Updated: {{ review.modified_at }}</small></p>
+                                    {% endif %}
+                                </div>
                             </div>
 
                             <!-- Modal -->
@@ -142,18 +150,13 @@
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                        <div>
-                            {% if review.created_at != review.modified_at %}
-                            <p class="text-muted text-right"><small>Updated: {{ review.modified_at }}</small></p>
+                            <hr/>
+                            {% endfor %}
                             {% endif %}
                         </div>
-                        <hr/>
-                        {% endfor %}
-                        {% endif %}
                     </div>
-                </div>
-            </section>
+                </section>
+            </div>
         </div>
     </div>
 </div>
