@@ -409,8 +409,8 @@ class TestView(TestCase):
         response = self.client.post(
             self.book_001.get_absolute_url() + 'new_review/',
             {
-                'my_score': 2,
                 'content' : "오바마의 댓글입니다.",
+                'my_score': 1,
             },
             follow=True
         )
