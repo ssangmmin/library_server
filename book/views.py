@@ -11,6 +11,7 @@ from django.views.generic import ListView, DetailView, CreateView, UpdateView
 class book_list(ListView):
     model = Book
     ordering = '-pk'
+    paginate_by = 3
 
     def get_context_data(self, **kwargs):
         context = super(book_list, self).get_context_data()
@@ -85,7 +86,7 @@ def tag_page(request, slug):
 
 class BookCreate(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     model = Book
-    fields = ['title', 'book_author', 'publisher', 'price', 'release_date', 'hook_text', 'content', 'head_image', 'file_upload', 'category']
+    fields = ['title', 'book_author', 'publisher', 'price', 'release_date', 'hook_text', 'content', 'head_image', 'file_upload', 'category', ]
 
     def test_func(self):
         return self.request.user.is_superuser or self.request.user.is_staff
