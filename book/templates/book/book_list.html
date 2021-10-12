@@ -9,7 +9,9 @@
     </a>
     {% endif %}
 {% endif %}
-<h1>도서목록 {% if category %}
+<h1>도서목록
+    {% if search_info %}<small class="text-muted">{{ search_info }}</small>{% endif %}
+    {% if category %}
     <span class="badge badge-secondary">{{ category }}</span>
     {% endif %}
     {% if tag %}

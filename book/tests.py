@@ -567,3 +567,26 @@ class TestView(TestCase):
 
         self.assertEqual(Review.objects.count(), 1)
         self.assertEqual(self.book_001.review_set.count(), 1)
+
+    def test_search(self):
+        book_about_python = Book.objects.create(
+            title='파이썬에 대한 포스트입니다.',
+            content='Hello World. We are the world.',
+            book_author=self.user_trump,
+            publisher='asd',
+            release_date='2021-09-22',
+            price=2000,
+
+        )
+
+        response = self.client.get('/book/search/파이썬/')
+        self.assertEqual(response.status_code, 200)
+        soup = BeautifulSoup(response.content, 'html.parser')
+
+        main_area = soup.find('div', id='main-area')
+
+        self.assertIn('Search: 파이썬 (1)', main_area.text)
+        self.assertNotIn(self.book_001.title, main_area.text)
+        self.assertNotIn(self.book_002.title, main_area.text)
+        self.assertNotIn(self.book_003.title, main_area.text)
+        self.assertIn(book_about_python.title, main_area.text)

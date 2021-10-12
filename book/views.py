@@ -1,5 +1,6 @@
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.core.exceptions import PermissionDenied
+from django.db.models import Q
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils.text import slugify
 
@@ -234,3 +235,21 @@ def delete_review(request, pk):
         return redirect(book.get_absolute_url())
     else:
         raise PermissionDenied
+
+
+class BookSearch(book_list):
+    paginate_by = None
+
+    def get_queryset(self):
+        q = self.kwargs['q']
+        post_list = Book.objects.filter(
+            Q(title__contains=q) | Q(tags__name__contains=q)
+        ).distinct() # distinct는 검색한 검색어의중복을 하나로
+        return post_list
+
+    def get_context_data(self, **kwargs):
+        context = super(BookSearch, self).get_context_data()
+        q = self.kwargs['q']
+        context['search_info'] = f'Search: {q} ({self.get_queryset().count()})'
+
+        return context
