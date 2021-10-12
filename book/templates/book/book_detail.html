@@ -112,7 +112,7 @@
                             {% for review in book.review_set.iterator %}
                             <div id="review-{{ review.pk }}">
                                 <div class="d-flex">
-                                    <div class="flex-shrink-0"><img class="rounded-circle" src="https://dummyimage.com/50x50/ced4da/6c757d.jpg" alt="..." /></div>
+                                    <div class="flex-shrink-0"><img class="rounded-circle" src="{{ review.get_avatar_url }}" alt="{{ review.author }}" width="60px" /></div>
                                     <div class="mr-auto">
                                         <div class="fw-bold">{{ review.author.username }} &nbsp;&nbsp;
                                             <small class="text-muted">{{ review.created_at }} Score: {{ review.score }}</small>
