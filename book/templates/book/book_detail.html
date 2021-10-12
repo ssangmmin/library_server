@@ -28,14 +28,15 @@
                         <!-- Post meta content-->
                         <div class="text-muted fst-italic mb-2">{{ book.created_at }}</div>
                         <!-- Post categories -->
-                        <hr>
                         {% if user.is_authenticated and user == book.author %}
                         <a class="btn btn-info btn-sm float-right" href="/book/update_book/{{ book.pk }}/" role="button">
-                            <i class="fas fa-pen"></i> Edit Book
-                        </a>
+                            <i class="fas fa-pen"></i> Edit Book</a>
+                        {% endif %}
+                        {% if user.is_authenticated %}
+                        <a class="btn btn-info btn-sm float-right" href="#" role="button" data-toggle="modal" data-target="#borrowing"><i class="fas fa-pen">대출하기</i></a>
                         {% endif %}
                         <p class="lead">by <a href="#">{{ book.author | upper }}</a></p>
-
+                        <hr/>
 
                     </header>
                     {% if book.head_image %}
@@ -46,7 +47,6 @@
 
                     <!-- Post content-->
                     <section class="mb-5"><p>{{ book.get_content_markdown | safe }}</p></section>
-
                     {% if book.tags.exists %}
                     <i class="fas fa-tags"></i>
                     {% for tag in book.tags.iterator %}
@@ -158,6 +158,27 @@
                                         <div class="modal-footer">
                                             <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
                                             <a role="button" class="btn btn-danger" href="/book/delete_review/{{ review.pk }}/">Delete</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!--대출하기버튼 모달-->
+                            <div class="modal fade" id="borrowing" tabindex="-1" role="dialog" aria-labelledby="deleteCommentModalLabel" aria-hidden="True">
+                                <div class="modal-dialog" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title"></h5>
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                        </div>
+                                        <div class="modal-body" >
+                                            반납일자:&nbsp;&nbsp;<input type="date" name="return-date">
+                                            <input type="text" placeholder="대출한 고객이름" name="customer-name">
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                                            <a role="button" class="btn btn-danger" href="/book/borrowing/">대출하기</a>
                                         </div>
                                     </div>
                                 </div>

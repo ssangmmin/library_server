@@ -37,6 +37,8 @@ class Category(models.Model):
 
 
 
+
+
 class Book(models.Model):
     title = models.CharField(max_length=30)
     book_author = models.CharField(max_length=128)
@@ -56,6 +58,9 @@ class Book(models.Model):
 
     head_image = models.ImageField(upload_to='book/images/%Y/%m/%d/', blank=True)
     file_upload = models.FileField(upload_to='book/files/%Y/%m/%d/', blank=True)
+
+
+
 
     def __str__(self):
         return f'[{self.pk}]{self.title} :: {self.author}'
@@ -93,3 +98,10 @@ class Review(models.Model):
             return self.author.socialaccount_set.first().get_avatar_url()
         else:
             return f'https://doitdjango.com/avatar/id/334/485d7d1a24069abc/svg/{self.author.email}'
+
+class Rental(models.Model):
+    book = models.ForeignKey(Book, on_delete=models.SET_NULL, blank=False, null=True)
+    librarian = models.ForeignKey(User, on_delete=models.SET_NULL, blank=False, null=True, related_name='librarian')
+    customer = models.ForeignKey(User, on_delete=models.SET_NULL, blank=False, null=True, related_name='customer')
+    created_at = models.DateTimeField(auto_now_add=True)
+    return_date = models.DateTimeField()

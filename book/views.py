@@ -253,3 +253,5 @@ class BookSearch(book_list):
         context['search_info'] = f'Search: {q} ({self.get_queryset().count()})'
 
         return context
+
+
