@@ -1,11 +1,12 @@
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
 from django.db.models import Q
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils.text import slugify
 
-from .forms import ReviewForm
-from .models import Book, Category, Tag, Review
+from .forms import ReviewForm, RentalForm
+from .models import Book, Category, Tag, Review, Rental
 from django.views.generic import ListView, DetailView, CreateView, UpdateView
 
 
@@ -57,6 +58,7 @@ class book_detail(DetailView):
         context['categories'] = Category.objects.all()
         context['no_category_book_count'] = Book.objects.filter(category=None).count()
         context['review_form'] = ReviewForm
+        context['rental_form'] = RentalForm
         return context
 
 # def book_detail(request, pk):
@@ -253,5 +255,73 @@ class BookSearch(book_list):
         context['search_info'] = f'Search: {q} ({self.get_queryset().count()})'
 
         return context
+
+
+
+def borrowing(request, pk):
+    # 로그인한 경우
+    if request.user.is_authenticated and (request.user.is_staff and request.user.is_superuser):
+        # 요청받은 주소에서 pk 번호를 이용해 Post 테이블을 조회
+        # 해당 pk를 가지는 포스트가 존재한다면 get 동작 수행
+        # 그렇지 않으면 404 예외발생하여 코드 실행을 중단하고
+        # 클라이언트에게 404 응답을 보내게 된다.
+        book = get_object_or_404(Book, pk=pk)
+
+        if request.method == 'POST':
+
+            customer = get_object_or_404(User, username=request.POST.get('customer-name'))
+            return_date = request.POST.get('return-date')
+            librarian = request.user
+
+
+            # request 요청 내용 중 method 변수를 확인하여
+            # POST 요청인지 확인한다.
+
+            # CommentForm에 POST 요청받은 내용을 담아 form 객체를 생성
+            rental_form = RentalForm(request.POST)
+            # form 객체 내부의 is_valid() 함수를 실행하여 유효성 검사 후
+            # 이상이 없다면 if문 실행
+            if rental_form.is_valid():
+                # comment_form에 담긴 내용을 DB에 저장하는 동작은 하지만
+                # 트랜젝션(Transaction)은 이뤄지지 않았다. (commit=False)
+                # comment 변수에는 Comment 객체가 담겨져 있다.
+                rental = rental_form.save(commit=False)
+                # comment 객체에 post 필드를 채워준다. (처음 pk로 불러온 Post)
+                rental.book = book
+                # author 필드는 현재 로그인한 사용자의 객체를 담는다.
+                rental.librarian = request.user
+                # comment 객체의 모든 내용을 채웠으므로
+                # 최종적으로 데이터베이스에 저장한다. 트랜젝션이 이루어진다.
+                고객이름 = request.POST.get('customer-name')
+                rental.customer = get_object_or_404(User, username=고객이름)
+                rental.save()
+                # 댓글이 작성된 곳으로 페이지 이동한다.
+                return redirect(book.get_absolute_url())
+        else:
+            # POST 방식이 아닌 요청이 들어온 경우는
+            # 포스트 상세페이지로 다시 이동한다.
+            return redirect(book.get_absolute_url())
+    else:
+        # 로그인하지 않은 사용자가 접근한 경우는 PermissionDenied 예외를 발생시키고
+        # 허가거부 페이지를 응답으로 보내게 된다.
+        raise PermissionDenied
+
+
+def delete_borrowing(request, pk):
+    borrowing = get_object_or_404(Book, pk=pk)
+    book = borrowing.book
+    if request.user.is_authenticated and request.user.is_staff and request.user.is_superuser:
+        book.delete()
+        return redirect(book.get_absolute_url())
+    else:
+        raise PermissionDenied
+
+
+ # 'book/' + 'pk' + '/' = 'book/pk/'
+ # 'book/' + pk + '/' = 'book/1/'
+
+
+
+
 
 

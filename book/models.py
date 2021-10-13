@@ -105,3 +105,7 @@ class Rental(models.Model):
     customer = models.ForeignKey(User, on_delete=models.SET_NULL, blank=False, null=True, related_name='customer')
     created_at = models.DateTimeField(auto_now_add=True)
     return_date = models.DateTimeField()
+
+    def __str__(self):
+        return f'{self.customer} :: {self.return_date}'
+

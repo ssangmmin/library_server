@@ -13,10 +13,14 @@
             <div id="book-area">
                 <!-- Post content-->
                 <!-- Category -->
+
                 {% if book.category %}
-                <span class="badge badge-secondary float-right">{{ book.category }}</span>
+                <h3><span class="badge badge-secondary float-right">{{ book.category }}</span></h3>
                 {% else %}
-                <span class="badge badge-secondary float-right">미분류 </span>
+                <h3><span class="badge badge-secondary float-right">미분류 </span></h3>
+                {% endif %}
+                {% if book.rental_set.exists %}
+                <h3><span class="badge badge-danger float-right">대출중</span></h3>
                 {% endif %}
 
                 <article>
@@ -32,8 +36,12 @@
                         <a class="btn btn-info btn-sm float-right" href="/book/update_book/{{ book.pk }}/" role="button">
                             <i class="fas fa-pen"></i> Edit Book</a>
                         {% endif %}
-                        {% if user.is_authenticated %}
-                        <a class="btn btn-info btn-sm float-right" href="#" role="button" data-toggle="modal" data-target="#borrowing"><i class="fas fa-pen">대출하기</i></a>
+                        {% if user.is_authenticated and user.is_superuser and user.is_staff %}
+                            {% if book.rental_set.exists %}
+                            <a class="btn btn-warning btn-sm float-right"  id="borrowing-{{ borrowing }}-delete-modal-btn"href="#" role="button" data-toggle="modal" data-target="#DelBorrowing">반납하기</a>
+                            {% else %}
+                            <a class="btn btn-info btn-sm float-right" href="#" role="button" data-toggle="modal" data-target="#borrowing">대출하기</a>
+                            {% endif %}
                         {% endif %}
                         <p class="lead">by <a href="#">{{ book.author | upper }}</a></p>
                         <hr/>
@@ -47,6 +55,7 @@
 
                     <!-- Post content-->
                     <section class="mb-5"><p>{{ book.get_content_markdown | safe }}</p></section>
+
                     {% if book.tags.exists %}
                     <i class="fas fa-tags"></i>
                     {% for tag in book.tags.iterator %}
@@ -172,18 +181,41 @@
                                                 <span aria-hidden="true">&times;</span>
                                             </button>
                                         </div>
-                                        <div class="modal-body" >
-                                            반납일자:&nbsp;&nbsp;<input type="date" name="return-date">
-                                            <input type="text" placeholder="대출한 고객이름" name="customer-name">
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                                            <a role="button" class="btn btn-danger" href="/book/borrowing/">대출하기</a>
-                                        </div>
+                                        <form method="POST" action="/book/{{ book.pk }}/borrowing/">
+                                            {% csrf_token %}
+                                            <div class="modal-body" >
+                                                <input type="text" placeholder="대출한 고객" name="customer-name">
+                                                {{ rental_form }}
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                                                <button type="submit" class="btn btn-danger">대출하기</button>
+                                            </div>
+                                        </form>
                                     </div>
                                 </div>
                             </div>
                             <hr/>
+                            <!--반납하기 버튼-->
+                            <div class="modal fade" id="DelBorrowing" tabindex="-1" role="dialog" aria-labelledby="DelBorrowingModalLabel" aria-hidden="True">
+                                <div class="modal-dialog" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <h3>반납하겠습니까?</h3>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">취소</button>
+                                            <a role="button" class="btn btn-danger" href="/book/delete_borrowing/{{ borrowing }}/">반납하기</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
                             {% endfor %}
                             {% endif %}
                         </div>
