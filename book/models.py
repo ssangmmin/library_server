@@ -109,3 +109,10 @@ class Rental(models.Model):
     def __str__(self):
         return f'{self.customer} :: {self.return_date}'
 
+
+
+
+
+
+
+

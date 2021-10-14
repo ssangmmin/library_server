@@ -307,11 +307,10 @@ def borrowing(request, pk):
         raise PermissionDenied
 
 
-def delete_borrowing(request, pk):
-    borrowing = get_object_or_404(Book, pk=pk)
-    book = borrowing.book
-    if request.user.is_authenticated and request.user.is_staff and request.user.is_superuser:
-        book.delete()
+def delete_rental(request, pk):
+    book = get_object_or_404(Book, pk=pk)
+    if request.user.is_authenticated and (request.user.is_staff or request.user.is_superuser):
+        book.rental_set.first().delete()
         return redirect(book.get_absolute_url())
     else:
         raise PermissionDenied
