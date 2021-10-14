@@ -77,6 +77,12 @@ class Book(models.Model):
     def get_content_markdown(self):
         return markdown(self.content)
 
+    def get_avatar_url(self):
+        if self.author.socialaccount_set.exists():
+            return self.author.socialaccount_set.first().get_avatar_url()
+        else:
+            return f'https://doitdjango.com/avatar/id/334/485d7d1a24069abc/svg/{self.author.email}'
+
 
 class Review(models.Model):
     # CASCADE이기 때문에 POST글이 삭제되면 댓글도 같이 삭제됩니다.
