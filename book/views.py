@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
@@ -6,7 +8,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.utils.text import slugify
 
 from .forms import ReviewForm, RentalForm
-from .models import Book, Category, Tag, Review, Rental
+from .models import Book, Category, Tag, Review, Rental, Reservation
 from django.views.generic import ListView, DetailView, CreateView, UpdateView
 
 
@@ -44,7 +46,7 @@ def category_page(request, slug):
       request,
             'book/book_list.html',
         {
-                'book_list': book_list,
+                'book_list': book_list, # book_list를 book_list 트럭에 담아서 book_list.html으로 옮겨서 사용
                 'categories': Category.objects.all(),
                 'no_category_book_count': Book.objects.filter(category=None).count(),
                 'category': category,
@@ -244,10 +246,10 @@ class BookSearch(book_list):
 
     def get_queryset(self):
         q = self.kwargs['q']
-        post_list = Book.objects.filter(
+        book_list = Book.objects.filter(
             Q(title__contains=q) | Q(tags__name__contains=q)
         ).distinct() # distinct는 검색한 검색어의중복을 하나로
-        return post_list
+        return book_list
 
     def get_context_data(self, **kwargs):
         context = super(BookSearch, self).get_context_data()
@@ -319,8 +321,36 @@ def delete_rental(request, pk):
  # 'book/' + 'pk' + '/' = 'book/pk/'
  # 'book/' + pk + '/' = 'book/1/'
 
+# search 검색어창 페이지 연결
+def search(request):
+    return render(
+        request,
+        'book/search.html',
+    )
+# info 페이지 연결
+def info(request):
+    return render(
+        request,
+        'book/info.html',
+    )
 
 
+def reservation(request, pk):
+    book = get_object_or_404(Book, pk=pk)
+    rental = book.rental_set.all().first()
+
+    available_date = rental.return_date + timedelta(1) # timedelta(1)은 return_date + 1일 추가하기
+    
+    if request.user.is_authenticated:
+        if not request.user.is_staff and not request.user.is_superuser:
+
+            return render(
+                request,
+                'book/reservation.html',
+                {
+                    'available_date': available_date,
+                }
+            )
 
 
 

@@ -1,6 +1,8 @@
+from django.db.models import Q
 from django.shortcuts import render
 
 from book.models import Book
+from book.views import book_list
 
 
 def index(request):
@@ -12,3 +14,6 @@ def index(request):
             'recent_books' : recent_books,
         }
     )
+
+
+

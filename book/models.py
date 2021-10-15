@@ -116,9 +116,13 @@ class Rental(models.Model):
         return f'{self.customer} :: {self.return_date}'
 
 
+class Reservation(models.Model):
+    book = models.ForeignKey(Book, on_delete=models.SET_NULL, blank=False, null=True)
+    customer = models.ForeignKey(User, on_delete=models.SET_NULL, blank=False, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
-
-
+    def __str__(self):
+        return f'{self.customer} :: {self.book}'
 
 
 

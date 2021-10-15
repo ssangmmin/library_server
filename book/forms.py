@@ -1,4 +1,4 @@
-from .models import Review, Rental
+from .models import Review, Rental, Reservation
 from django import forms
 
 class ReviewForm(forms.ModelForm):
@@ -16,3 +16,8 @@ class RentalForm(forms.ModelForm):
         widgets = {
             'return_date' : DateInput()
         }
+
+class ReservationForm(forms.ModelForm):
+    class Meta:
+        model = Reservation
+        fields = ()
