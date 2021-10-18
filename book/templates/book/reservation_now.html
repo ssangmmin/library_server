@@ -30,11 +30,13 @@
         <div class="col-md-8 col-lg-9" id="main-area">
 
             {% for r in reservations %}
-                <a>도서정보: {{ r.book.title }}</a>
-                <a>대출한 고객이름: {{ r.book.rental_set.all.first.customer.username }}</a>
-            {% endfor %}
+            <a>도서정보: {{ r.book.title }}</a><br/>
+            <a>대출한 고객이름: {{ r.book.rental_set.all.first.customer.username }}</a><br/>
+            <a>반납일: {{ r.book.rental_set.all.first.return_date }}</a><br/>
+            <a>대출 예약한 고객명: {{ r.customer }}</a><br/>
+            <a>대출 예약 날짜: {{ r.created_at }}</a>
             <a class="btn btn-info btn-sm float-right" href="#" role="button" data-toggle="modal" data-target="#borrowing">대출하기</a>
-
+            {% endfor %}
 
         </div>
     </div>
