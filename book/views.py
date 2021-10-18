@@ -6,8 +6,8 @@ from django.core.exceptions import PermissionDenied
 from django.db.models import Q
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils.text import slugify
-
-from .forms import ReviewForm, RentalForm
+from django.core.mail import EmailMessage
+from .forms import ReviewForm, RentalForm, ReservationForm
 from .models import Book, Category, Tag, Review, Rental, Reservation
 from django.views.generic import ListView, DetailView, CreateView, UpdateView
 
@@ -334,23 +334,70 @@ def info(request):
         'book/info.html',
     )
 
+def reservation_now(request):
+    reservations = Reservation.objects.all()
+
+    return render(
+        request,
+        'book/reservation_now.html',
+        {
+            'reservations': reservations,
+        }
+    )
+
 
 def reservation(request, pk):
-    book = get_object_or_404(Book, pk=pk)
+    book = get_object_or_404(Book, pk=pk) # pk = primary key (Book 안의 필드값)
+
     rental = book.rental_set.all().first()
 
+    reservation = book.reservation_set.all()
+
+    waiting_number = reservation.count()
+
     available_date = rental.return_date + timedelta(1) # timedelta(1)은 return_date + 1일 추가하기
-    
+
     if request.user.is_authenticated:
         if not request.user.is_staff and not request.user.is_superuser:
+            if request.method == 'POST':
+
+                # CommentForm에 POST 요청받은 내용을 담아 form 객체를 생성
+                reservation_form = ReservationForm(request.POST)
+                # form 객체 내부의 is_valid() 함수를 실행하여 유효성 검사 후
+                # 이상이 없다면 if문 실행
+                if reservation_form.is_valid():
+                    # comment_form에 담긴 내용을 DB에 저장하는 동작은 하지만
+                    # 트랜젝션(Transaction)은 이뤄지지 않았다. (commit=False)
+                    # comment 변수에는 Comment 객체가 담겨져 있다.
+                    reservation = reservation_form.save(commit=False)
+
+                    reservation.book = book
+
+                    reservation.customer = request.user
+
+                    reservation.save()
+
+                    email = EmailMessage('안녕', 'django 테스트입니다', to=[request.user.email])
+                    email.send()
+
+                    return render(
+                        request,
+                        'book/reservation.html',
+                        {
+                            'available_date': available_date,
+                            'waiting_number': waiting_number,
+                        }
+                    )
 
             return render(
                 request,
                 'book/reservation.html',
                 {
                     'available_date': available_date,
+                    'waiting_number': waiting_number,
                 }
             )
+
 
 
 

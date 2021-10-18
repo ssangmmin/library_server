@@ -113,7 +113,7 @@ class Rental(models.Model):
     return_date = models.DateTimeField()
 
     def __str__(self):
-        return f'{self.customer} :: {self.return_date}'
+        return f'{self.book} {self.return_date}'
 
 
 class Reservation(models.Model):
@@ -122,7 +122,7 @@ class Reservation(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f'{self.customer} :: {self.book}'
+        return f'{self.customer} {self.book}'
 
 
 
