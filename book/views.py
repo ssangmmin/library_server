@@ -377,8 +377,8 @@ def reservation(request, pk):
 
                     reservation.save()
 
-                    email = EmailMessage('안녕', 'django 테스트입니다', to=[request.user.email])
-                    email.send()
+                    # email = EmailMessage('안녕', 'django 테스트입니다', to=[request.user.email])
+                    # email.send()
 
                     return render(
                         request,
