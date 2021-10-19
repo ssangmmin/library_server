@@ -3,11 +3,12 @@ from datetime import timedelta
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
+from django.db import transaction
 from django.db.models import Q
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils.text import slugify
 from django.core.mail import EmailMessage
-from .forms import ReviewForm, RentalForm, ReservationForm
+from .forms import ReviewForm, RentalForm, ReservationForm, Reservation_delete
 from .models import Book, Category, Tag, Review, Rental, Reservation
 from django.views.generic import ListView, DetailView, CreateView, UpdateView
 
@@ -397,6 +398,26 @@ def reservation(request, pk):
                     'waiting_number': waiting_number,
                 }
             )
+
+def change_rental(request, pk):
+
+    book = get_object_or_404(Book, pk=pk)
+
+    rental = book.rental_set.first()
+
+    rental.delete()
+
+    reservation = book.reservation_set.all()
+
+    for r in reservation:
+        if reservation():
+            rental
+
+
+
+            # email = EmailMessage('안녕', 'django 테스트입니다', to=[request.user.email])
+            # email.send()
+
 
 
 

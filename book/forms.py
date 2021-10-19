@@ -21,3 +21,8 @@ class ReservationForm(forms.ModelForm):
     class Meta:
         model = Reservation
         fields = ()
+
+class Reservation_delete(forms.ModelForm):
+    class Meta:
+        model = Reservation
+        fields = ()
