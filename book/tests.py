@@ -83,12 +83,12 @@ class TestView(TestCase):
         self.assertEqual(home_btn.attrs['href'], '/')
 
         # 자료검색 버튼은 포스트 목록 페이지로 이동해야 한다.
-        blog_btn = navbar.find('a', text='자료검색')
-        self.assertEqual(blog_btn.attrs['href'], '/book/')
+        blog_btn = navbar.find('a', text='소장자료')
+        self.assertEqual(blog_btn.attrs['href'], '/book/search/')
 
         # About Me 버튼은 자기소개 페이지로 이동해야 한다.
         about_me_btn = navbar.find('a', text='도서관안내')
-        self.assertEqual(about_me_btn.attrs['href'], '/book/')
+        self.assertEqual(about_me_btn.attrs['href'], '/book/info/')
 
     def category_card_test(self, soup):
         categories_card = soup.find('div', id='categories-card')
