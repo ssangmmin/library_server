@@ -8,7 +8,7 @@ from django.db.models import Q
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils.text import slugify
 from django.core.mail import EmailMessage
-from .forms import ReviewForm, RentalForm, ReservationForm, Reservation_delete
+from .forms import ReviewForm, RentalForm, ReservationForm
 from .models import Book, Category, Tag, Review, Rental, Reservation
 from django.views.generic import ListView, DetailView, CreateView, UpdateView
 
